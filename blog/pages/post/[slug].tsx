@@ -1,88 +1,156 @@
-import { GetStaticPaths, GetStaticProps, NextPage } from 'next'
-import { client, urlFor } from '../../lib/sanity'
-import { PortableText } from '@portabletext/react'
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import Link from 'next/link';
+import Layout from '../../components/Layout';
+import { client, urlFor } from '../../lib/sanity';
+import { PortableText } from '@portabletext/react';
 
 interface Post {
-  _id: string
-  title: string
-  slug: { current: string }
-  mainImage: any
-  author?: string
-  publishedAt: string
-  body: any
+  _id: string;
+  title: string;
+  slug: { current: string };
+  mainImage: any;
+  author?: string;
+  publishedAt: string;
+  body: any;
 }
 
 interface Props {
-  post: Post
+  post: Post;
 }
 
 const PostPage: NextPage<Props> = ({ post }) => {
-  // PortableText custom components
   const components = {
     types: {
       image: ({ value }: any) => {
-        if (!value?.asset?._ref) return null
+        if (!value?.asset?._ref) return null;
         return (
           <img
             src={urlFor(value).width(800).url()}
             alt={value.alt || 'Blog Image'}
-            style={{
-              width: '100%',
-              margin: '1rem 0',
-              objectFit: 'cover',
-              borderRadius: '8px',
-            }}
+            style={styles.blogImage}
           />
-        )
+        );
       },
     },
     marks: {
-      // Optional: render links
       link: ({ children, value }: any) => {
-        const href = value?.href || '#'
+        const href = value?.href || '#';
         return (
-          <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'blue' }}>
+          <a href={href} target="_blank" rel="noopener noreferrer" style={styles.link}>
             {children}
           </a>
-        )
+        );
       },
     },
-  }
+    block: {
+      normal: ({ children }: any) => <p style={styles.paragraph}>{children}</p>,
+      h2: ({ children }: any) => <h2 style={styles.h2}>{children}</h2>,
+      h3: ({ children }: any) => <h3 style={styles.h3}>{children}</h3>,
+    },
+  };
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem' }}>
-      <h1>{post.title}</h1>
-      <p>
-        By {post.author || 'Unknown'} on {new Date(post.publishedAt).toDateString()}
-      </p>
+    <Layout>
+      <article style={styles.container}>
+        <Link href="/">
+          <a style={styles.backLink}>← Back to all posts</a>
+        </Link>
+        <h1 style={styles.title}>{post.title}</h1>
+        <div style={styles.meta}>
+          By {post.author || 'Anonymous'} •{' '}
+          {new Date(post.publishedAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </div>
+        {post.mainImage && (
+          <img
+            src={urlFor(post.mainImage).width(800).url()}
+            alt={post.title}
+            style={styles.featuredImage}
+          />
+        )}
+        <div style={styles.content}>
+          <PortableText value={post.body} components={components} />
+        </div>
+      </article>
+    </Layout>
+  );
+};
 
-      {post.mainImage && (
-        <img
-          src={urlFor(post.mainImage).width(800).url()}
-          alt={post.title}
-          style={{ width: '100%', height: 'auto', borderRadius: '8px', marginBottom: '2rem' }}
-        />
-      )}
+const styles = {
+  container: {
+    maxWidth: 800,
+    margin: '0 auto',
+  },
+  backLink: {
+    display: 'inline-block',
+    marginBottom: '2rem',
+    color: '#10b981',
+    textDecoration: 'none',
+    fontWeight: '500',
+  },
+  title: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: '0.5rem',
+  },
+  meta: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    marginBottom: '1.5rem',
+  },
+  featuredImage: {
+    width: '100%',
+    height: 'auto',
+    borderRadius: '0.75rem',
+    marginBottom: '2rem',
+  },
+  content: {
+    fontSize: '1.125rem',
+    lineHeight: 1.7,
+    color: '#1f2937',
+  },
+  blogImage: {
+    width: '100%',
+    margin: '1.5rem 0',
+    borderRadius: '0.5rem',
+  },
+  link: {
+    color: '#10b981',
+    textDecoration: 'underline',
+  },
+  paragraph: {
+    marginBottom: '1.25rem',
+  },
+  h2: {
+    fontSize: '1.875rem',
+    fontWeight: 'bold',
+    marginTop: '2rem',
+    marginBottom: '1rem',
+    color: '#111827',
+  },
+  h3: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    marginTop: '1.5rem',
+    marginBottom: '0.75rem',
+    color: '#111827',
+  },
+};
 
-      <div style={{ marginTop: '2rem' }}>
-        <PortableText value={post.body} components={components} />
-      </div>
-    </div>
-  )
-}
-
-// Generate paths for all posts
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = await client.fetch(
     `*[_type == "post" && defined(slug.current)]{ "slug": slug.current }`
-  )
+  );
   return {
     paths: slugs.map((s: any) => ({ params: { slug: s.slug } })),
-    fallback: false, // change to 'blocking' if you want incremental builds
-  }
-}
+    fallback: false,
+  };
+};
 
-// Fetch single post by slug
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const query = `*[_type == "post" && slug.current == $slug][0]{
     _id,
@@ -92,9 +160,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     author,
     publishedAt,
     body
-  }`
-  const post = await client.fetch(query, { slug: params?.slug })
-  return { props: { post } }
-}
+  }`;
+  const post = await client.fetch(query, { slug: params?.slug });
+  return { props: { post } };
+};
 
-export default PostPage
+export default PostPage;
