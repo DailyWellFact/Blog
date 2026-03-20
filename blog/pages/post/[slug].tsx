@@ -16,9 +16,10 @@ interface Post {
 
 interface Props {
   post: Post;
+  relatedPosts: Post[];
 }
 
-const PostPage: NextPage<Props> = ({ post }) => {
+const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   const components = {
     types: {
       image: ({ value }: any) => {
@@ -74,6 +75,41 @@ const PostPage: NextPage<Props> = ({ post }) => {
         <div style={styles.content}>
           <PortableText value={post.body} components={components} />
         </div>
+
+        {relatedPosts.length > 0 && (
+          <section style={styles.relatedSection}>
+            <h2 style={styles.relatedTitle}>You Might Also Like</h2>
+            <div style={styles.relatedGrid}>
+              {relatedPosts.map((related) => (
+                <div key={related._id} style={styles.relatedCard}>
+                  {related.mainImage && (
+                    <Link href={`/post/${related.slug.current}`}>
+                      <a style={styles.relatedImageLink}>
+                        <img
+                          src={urlFor(related.mainImage).width(400).url()}
+                          alt={related.title}
+                          style={styles.relatedImage}
+                        />
+                      </a>
+                    </Link>
+                  )}
+                  <div style={styles.relatedCardContent}>
+                    <Link href={`/post/${related.slug.current}`}>
+                      <a style={styles.relatedCardTitle}>{related.title}</a>
+                    </Link>
+                    <p style={styles.relatedCardMeta}>
+                      {new Date(related.publishedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </article>
     </Layout>
   );
@@ -139,6 +175,53 @@ const styles = {
     marginBottom: '0.75rem',
     color: '#111827',
   },
+  relatedSection: {
+    marginTop: '4rem',
+    paddingTop: '2rem',
+    borderTop: '1px solid #e5e7eb',
+  },
+  relatedTitle: {
+    fontSize: '1.75rem',
+    fontWeight: 'bold',
+    marginBottom: '1.5rem',
+    color: '#1f2937',
+  },
+  relatedGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+    gap: '1.5rem',
+  },
+  relatedCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: '0.75rem',
+    overflow: 'hidden',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+  },
+  relatedImageLink: {
+    display: 'block',
+  },
+  relatedImage: {
+    width: '100%',
+    height: '160px',
+    objectFit: 'cover' as const,
+  },
+  relatedCardContent: {
+    padding: '1rem',
+  },
+  relatedCardTitle: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#111827',
+    textDecoration: 'none',
+    display: 'inline-block',
+    marginBottom: '0.5rem',
+    lineHeight: 1.4,
+  },
+  relatedCardMeta: {
+    fontSize: '0.75rem',
+    color: '#6b7280',
+  },
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -152,6 +235,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
+  // Fetch the current post
   const query = `*[_type == "post" && slug.current == $slug][0]{
     _id,
     title,
@@ -162,7 +246,24 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     body
   }`;
   const post = await client.fetch(query, { slug: params?.slug });
-  return { props: { post } };
+
+  // Fetch all posts for related suggestions
+  const allPostsQuery = `*[_type == "post"]{
+    _id,
+    title,
+    slug,
+    mainImage,
+    author,
+    publishedAt
+  }`;
+  const allPosts = await client.fetch(allPostsQuery);
+
+  // Exclude current post and pick up to 3 random ones
+  const otherPosts = allPosts.filter((p: Post) => p._id !== post?._id);
+  const shuffled = otherPosts.sort(() => 0.5 - Math.random());
+  const relatedPosts = shuffled.slice(0, 3);
+
+  return { props: { post, relatedPosts } };
 };
 
 export default PostPage;
