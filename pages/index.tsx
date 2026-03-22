@@ -1,5 +1,6 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import Layout from '../components/Layout';
 import { client, urlFor } from '../lib/sanity';
 
 interface Post {
@@ -17,35 +18,119 @@ interface Props {
 
 const Home: NextPage<Props> = ({ posts }) => {
   return (
-    <main style={{ maxWidth: 900, margin: '0 auto' }}>
-      <h1>Latest Wellness Insights</h1>
+    <Layout>
+      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+        <h1 style={styles.pageTitle}>Latest Wellness Insights</h1>
 
-      {posts.map((post) => {
-        const postUrl = post.slug?.current ? `/post/${post.slug.current}` : null;
-        const imageUrl = post.mainImage ? urlFor(post.mainImage).width(600).url() : null;
+        <div style={styles.grid}>
+          {posts.map((post) => {
+            const postUrl = post.slug?.current ? `/post/${post.slug.current}` : null;
 
-        return (
-          <article key={post._id}>
-            {imageUrl && postUrl && (
-              <Link href={postUrl}>
-                <img src={imageUrl} alt={post.title} width={600} />
-              </Link>
-            )}
+            // Safe image URL (no undefined)
+            const imageUrl =
+              post.mainImage ? urlFor(post.mainImage).width(600).url() : null;
 
-            <h2>
-              {postUrl ? <Link href={postUrl}>{post.title}</Link> : post.title}
-            </h2>
-          </article>
-        );
-      })}
-    </main>
+            // Pre-format date on server (stable)
+            const formattedDate =
+              post.publishedAt
+                ? new Date(post.publishedAt).toISOString().split('T')[0]
+                : null;
+
+            return (
+              <article key={post._id} style={styles.card}>
+                {imageUrl && postUrl && (
+                  <Link href={postUrl} style={styles.imageLink}>
+                    <img
+                      src={imageUrl}
+                      alt={post.title}
+                      style={styles.cardImage}
+                    />
+                  </Link>
+                )}
+
+                <div style={styles.cardContent}>
+                  {postUrl ? (
+                    <Link href={postUrl} style={styles.cardTitle}>
+                      {post.title}
+                    </Link>
+                  ) : (
+                    <span style={styles.cardTitle}>{post.title}</span>
+                  )}
+
+                  <p style={styles.cardMeta}>
+                    By {post.author || 'Anonymous'}
+                    {formattedDate ? ` • ${formattedDate}` : ''}
+                  </p>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </Layout>
   );
 };
 
+const styles = {
+  pageTitle: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    textAlign: 'center' as const,
+    marginBottom: '2rem',
+    color: '#1f2937',
+  },
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gap: '2rem',
+  },
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: '1rem',
+    overflow: 'hidden',
+    boxShadow:
+      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+  },
+  imageLink: {
+    display: 'block',
+  },
+  cardImage: {
+    width: '100%',
+    height: '200px',
+    objectFit: 'cover' as const,
+  },
+  cardContent: {
+    padding: '1.5rem',
+  },
+  cardTitle: {
+    fontSize: '1.25rem',
+    fontWeight: 600,
+    color: '#111827',
+    textDecoration: 'none',
+    display: 'inline-block',
+  },
+  cardMeta: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    marginTop: '0.5rem',
+  },
+};
+
 export async function getStaticProps() {
-  const query = `*[_type == "post"]{ _id, title, slug, mainImage, author, publishedAt }`;
+  const query = `*[_type == "post"]{
+    _id,
+    title,
+    slug,
+    mainImage,
+    author,
+    publishedAt
+  }`;
+
   const posts = await client.fetch(query);
-  return { props: { posts } };
+
+  return {
+    props: { posts },
+  };
 }
 
 export default Home;
