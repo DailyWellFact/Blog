@@ -25,7 +25,7 @@ const Privacy: NextPage = () => {
           </p>
           <h2 style={styles.subtitle}>Contact Us</h2>
           <p>
-            If you have any questions, please reach out at <a href="mailto:privacy@dailywellfact.com" style={styles.link}>privacy@dailywellfact.com</a>.
+            If you have any questions, please reach out at <a href="mailto:dailyhabitfact@gmail.com" style={styles.link}>dailyhabitfact@gmail.com</a>.
           </p>
         </div>
       </div>
