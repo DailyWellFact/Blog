@@ -5,25 +5,31 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+// Deterministic (no hydration mismatch)
+const currentYear = new Date().getFullYear();
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <Link href="/">
-            <a style={styles.logo}>Daily Well Fact</a>
+          <Link href="/" style={styles.logo}>
+            Daily Well Fact
           </Link>
+
           <nav style={styles.nav}>
-            <Link href="/"><a style={styles.navLink}>Home</a></Link>
-            <Link href="/about"><a style={styles.navLink}>About</a></Link>
-            <Link href="/privacy"><a style={styles.navLink}>Privacy</a></Link>
-            <Link href="/disclaimer"><a style={styles.navLink}>Disclaimer</a></Link>
+            <Link href="/" style={styles.navLink}>Home</Link>
+            <Link href="/about" style={styles.navLink}>About</Link>
+            <Link href="/privacy" style={styles.navLink}>Privacy</Link>
+            <Link href="/disclaimer" style={styles.navLink}>Disclaimer</Link>
           </nav>
         </div>
       </header>
+
       <main style={styles.main}>{children}</main>
+
       <footer style={styles.footer}>
-        <p>© {new Date().getFullYear()} Daily Well Fact. All rights reserved.</p>
+        <p>© {currentYear} Daily Well Fact. All rights reserved.</p>
       </footer>
     </div>
   );
@@ -58,7 +64,6 @@ const styles = {
     fontWeight: 'bold',
     color: '#10b981',
     textDecoration: 'none',
-    transition: 'color 0.2s',
   },
   nav: {
     display: 'flex',
@@ -69,7 +74,6 @@ const styles = {
     color: '#4b5563',
     textDecoration: 'none',
     fontSize: '1rem',
-    transition: 'color 0.2s',
   },
   main: {
     flex: 1,
