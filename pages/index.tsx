@@ -30,8 +30,18 @@ const Home: NextPage<Props> = ({ posts }) => {
         <h1 style={styles.pageTitle}>Latest Wellness Insights</h1>
         <div style={styles.grid}>
           {posts.map((post) => {
-            const imageUrl = post.mainImage ? urlFor(post.mainImage).width(600).url() : null;
             const postUrl = post.slug?.current ? `/post/${post.slug.current}` : null;
+
+            // Only compute image URL and date on client
+            const imageUrl = hasMounted && post.mainImage ? urlFor(post.mainImage).width(600).url() : null;
+            const formattedDate =
+              hasMounted && post.publishedAt
+                ? new Date(post.publishedAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })
+                : '';
 
             return (
               <article key={post._id} style={styles.card}>
@@ -52,13 +62,7 @@ const Home: NextPage<Props> = ({ posts }) => {
 
                   <p style={styles.cardMeta}>
                     By {post.author || 'Anonymous'}
-                    {hasMounted && post.publishedAt
-                      ? ` • ${new Date(post.publishedAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        })}`
-                      : ''}
+                    {formattedDate ? ` • ${formattedDate}` : ''}
                   </p>
                 </div>
               </article>
