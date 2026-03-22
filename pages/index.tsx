@@ -1,3 +1,4 @@
+// pages/index.tsx
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import Layout from '../components/Layout';
@@ -6,10 +7,10 @@ import { client, urlFor } from '../lib/sanity';
 interface Post {
   _id: string;
   title: string;
-  slug: { current: string };
-  mainImage: any;
+  slug?: { current?: string };
+  mainImage?: any;
   author?: string;
-  publishedAt: string;
+  publishedAt?: string;
 }
 
 interface Props {
@@ -22,38 +23,47 @@ const Home: NextPage<Props> = ({ posts }) => {
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <h1 style={styles.pageTitle}>Latest Wellness Insights</h1>
         <div style={styles.grid}>
-          {posts.map((post) => (
-            <article key={post._id} style={styles.card}>
-              {post.mainImage && (
-                <Link
-                  href={`/post/${post.slug.current}`}
-                  style={{ ...styles.imageLink, display: 'block' }}
-                >
-                  <img
-                    src={urlFor(post.mainImage).width(600).url()}
-                    alt={post.title}
-                    style={styles.cardImage}
-                  />
-                </Link>
-              )}
-              <div style={styles.cardContent}>
-                <Link
-                  href={`/post/${post.slug.current}`}
-                  style={styles.cardTitle}
-                >
-                  {post.title}
-                </Link>
-                <p style={styles.cardMeta}>
-                  By {post.author || 'Anonymous'} •{' '}
-                  {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
-              </div>
-            </article>
-          ))}
+          {posts.map((post) => {
+            // Safe image URL
+            const imageUrl = post.mainImage ? urlFor(post.mainImage).width(600).url() : null;
+
+            // Safe slug URL
+            const postUrl = post.slug?.current ? `/post/${post.slug.current}` : null;
+
+            // Safe published date
+            const date = post.publishedAt ? new Date(post.publishedAt) : null;
+
+            return (
+              <article key={post._id} style={styles.card}>
+                {imageUrl && postUrl && (
+                  <Link href={postUrl} style={styles.imageLink}>
+                    <img src={imageUrl} alt={post.title} style={styles.cardImage} />
+                  </Link>
+                )}
+
+                <div style={styles.cardContent}>
+                  {postUrl ? (
+                    <Link href={postUrl} style={styles.cardTitle}>
+                      {post.title}
+                    </Link>
+                  ) : (
+                    <span style={styles.cardTitle}>{post.title}</span>
+                  )}
+
+                  <p style={styles.cardMeta}>
+                    By {post.author || 'Anonymous'}
+                    {date
+                      ? ` • ${date.toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}`
+                      : ''}
+                  </p>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </Layout>
@@ -82,6 +92,7 @@ const styles = {
     transition: 'transform 0.2s, box-shadow 0.2s',
   },
   imageLink: {
+    display: 'block',
     cursor: 'pointer',
   },
   cardImage: {
@@ -117,6 +128,7 @@ export async function getStaticProps() {
     publishedAt
   }`;
   const posts = await client.fetch(query);
+
   return { props: { posts } };
 }
 
