@@ -1,15 +1,13 @@
 // /sanity/deskStructure.ts
-import S from 'sanity/desk'
+import { ListItemBuilder } from 'sanity/desk'
 
-export const deskStructure = () =>
-  S.list()
+export const deskStructure = (S: any) => {
+  return S.list()
     .title('Content')
     .items([
-      // Post document list
       S.listItem()
         .title('Posts')
         .schemaType('post')
-        .child(
-          S.documentTypeList('post').title('Posts')
-        ),
+        .child(S.documentTypeList('post').title('Posts')),
     ])
+}
