@@ -25,19 +25,23 @@ const Home: NextPage<Props> = ({ posts }) => {
           {posts.map((post) => (
             <article key={post._id} style={styles.card}>
               {post.mainImage && (
-                <Link href={`/post/${post.slug.current}`}>
-                  <a style={styles.imageLink}>
-                    <img
-                      src={urlFor(post.mainImage).width(600).url()}
-                      alt={post.title}
-                      style={styles.cardImage}
-                    />
-                  </a>
+                <Link
+                  href={`/post/${post.slug.current}`}
+                  style={{ ...styles.imageLink, display: 'block' }}
+                >
+                  <img
+                    src={urlFor(post.mainImage).width(600).url()}
+                    alt={post.title}
+                    style={styles.cardImage}
+                  />
                 </Link>
               )}
               <div style={styles.cardContent}>
-                <Link href={`/post/${post.slug.current}`}>
-                  <a style={styles.cardTitle}>{post.title}</a>
+                <Link
+                  href={`/post/${post.slug.current}`}
+                  style={styles.cardTitle}
+                >
+                  {post.title}
                 </Link>
                 <p style={styles.cardMeta}>
                   By {post.author || 'Anonymous'} •{' '}
@@ -73,11 +77,12 @@ const styles = {
     backgroundColor: '#ffffff',
     borderRadius: '1rem',
     overflow: 'hidden',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    boxShadow:
+      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     transition: 'transform 0.2s, box-shadow 0.2s',
   },
   imageLink: {
-    display: 'block',
+    cursor: 'pointer',
   },
   cardImage: {
     width: '100%',
