@@ -6,8 +6,8 @@ import { deskStructure } from './deskStructure'
 
 export default defineConfig({
   name: 'default',
-  title: 'Blog',
-  projectId: 'q5ebm0hv',
+  title: 'DailyWellFact CMS',
+  projectId: 'q5ebm0hv', // replace with your Sanity project ID
   dataset: 'production',
   plugins: [
     deskTool({
