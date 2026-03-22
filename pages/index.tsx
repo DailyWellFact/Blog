@@ -1,6 +1,6 @@
-// pages/index.tsx
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { client, urlFor } from '../lib/sanity';
 
@@ -18,20 +18,20 @@ interface Props {
 }
 
 const Home: NextPage<Props> = ({ posts }) => {
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   return (
     <Layout>
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <h1 style={styles.pageTitle}>Latest Wellness Insights</h1>
         <div style={styles.grid}>
           {posts.map((post) => {
-            // Safe image URL
             const imageUrl = post.mainImage ? urlFor(post.mainImage).width(600).url() : null;
-
-            // Safe slug URL
             const postUrl = post.slug?.current ? `/post/${post.slug.current}` : null;
-
-            // Safe published date
-            const date = post.publishedAt ? new Date(post.publishedAt) : null;
 
             return (
               <article key={post._id} style={styles.card}>
@@ -52,8 +52,8 @@ const Home: NextPage<Props> = ({ posts }) => {
 
                   <p style={styles.cardMeta}>
                     By {post.author || 'Anonymous'}
-                    {date
-                      ? ` • ${date.toLocaleDateString('en-US', {
+                    {hasMounted && post.publishedAt
+                      ? ` • ${new Date(post.publishedAt).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
@@ -71,64 +71,19 @@ const Home: NextPage<Props> = ({ posts }) => {
 };
 
 const styles = {
-  pageTitle: {
-    fontSize: '2.5rem',
-    fontWeight: 'bold',
-    textAlign: 'center' as const,
-    marginBottom: '2rem',
-    color: '#1f2937',
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '2rem',
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: '1rem',
-    overflow: 'hidden',
-    boxShadow:
-      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    transition: 'transform 0.2s, box-shadow 0.2s',
-  },
-  imageLink: {
-    display: 'block',
-    cursor: 'pointer',
-  },
-  cardImage: {
-    width: '100%',
-    height: '200px',
-    objectFit: 'cover' as const,
-  },
-  cardContent: {
-    padding: '1.5rem',
-  },
-  cardTitle: {
-    fontSize: '1.25rem',
-    fontWeight: '600',
-    color: '#111827',
-    textDecoration: 'none',
-    marginBottom: '0.5rem',
-    display: 'inline-block',
-    transition: 'color 0.2s',
-  },
-  cardMeta: {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-  },
+  pageTitle: { fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center' as const, marginBottom: '2rem', color: '#1f2937' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' },
+  card: { backgroundColor: '#fff', borderRadius: '1rem', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1),0 2px 4px -1px rgba(0,0,0,0.06)', transition: 'transform 0.2s, box-shadow 0.2s' },
+  imageLink: { display: 'block', cursor: 'pointer' },
+  cardImage: { width: '100%', height: '200px', objectFit: 'cover' as const },
+  cardContent: { padding: '1.5rem' },
+  cardTitle: { fontSize: '1.25rem', fontWeight: 600, color: '#111827', textDecoration: 'none', marginBottom: '0.5rem', display: 'inline-block', transition: 'color 0.2s' },
+  cardMeta: { fontSize: '0.875rem', color: '#6b7280' },
 };
 
 export async function getStaticProps() {
-  const query = `*[_type == "post"]{
-    _id,
-    title,
-    slug,
-    mainImage,
-    author,
-    publishedAt
-  }`;
+  const query = `*[_type == "post"]{ _id, title, slug, mainImage, author, publishedAt }`;
   const posts = await client.fetch(query);
-
   return { props: { posts } };
 }
 
