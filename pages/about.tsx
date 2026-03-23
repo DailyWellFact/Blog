@@ -7,14 +7,15 @@ const About: NextPage = () => {
       <div style={styles.container}>
         <h1 style={styles.title}>About Daily Well Fact</h1>
         <div style={styles.content}>
-          <p>
-            Daily Well Fact is your daily dose of science-backed wellness insights. We believe that small, consistent habits lead to profound health transformations. Our mission is to empower you with trustworthy, actionable information so you can take charge of your well-being.
+          <p style={styles.paragraph}>
+            <strong>Daily Well Fact</strong> is your daily dose of reliable, science‑backed wellness insights. Founded in 2026, we are dedicated to helping you live a healthier life through small, consistent habits.
           </p>
-          <p>
-            Founded in 2025, our team includes health researchers, nutritionists, and wellness enthusiasts who are passionate about demystifying complex topics. Every fact we share is reviewed for accuracy and presented in an easy-to-understand way.
+          <p style={styles.paragraph}>
+            All our content is carefully curated from trusted, authoritative sources, ensuring you receive accurate and up‑to‑date information. We believe in the power of simple, actionable facts that can make a real difference in your well‑being.
           </p>
-          <p>
-            Whether you're looking to improve your sleep, boost your immunity, or simply understand how your body works, we're here to guide you. Thank you for being part of our community.
+          <p style={styles.paragraph}>
+            We’re committed to transparency and quality. If you spot any mistake in our posts or have a question, we’d love to hear from you. Reach us at{' '}
+            <a href="mailto:dailyhabitfact@gmail.com" style={styles.link}>dailyhabitfact@gmail.com</a>.
           </p>
         </div>
       </div>
@@ -26,10 +27,11 @@ const styles = {
   container: {
     maxWidth: 800,
     margin: '0 auto',
+    padding: '2rem 0',
   },
   title: {
     fontSize: '3rem',
-    fontWeight: 800,
+    fontWeight: 'bold',
     marginBottom: '2rem',
     color: '#1f2937',
     letterSpacing: '-0.02em',
@@ -38,6 +40,13 @@ const styles = {
     fontSize: '1.125rem',
     lineHeight: 1.7,
     color: '#4b5563',
+  },
+  paragraph: {
+    marginBottom: '1.5rem',
+  },
+  link: {
+    color: '#10b981',
+    textDecoration: 'underline',
   },
 };
 

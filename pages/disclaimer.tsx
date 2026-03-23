@@ -8,28 +8,14 @@ const Disclaimer: NextPage = () => {
         <h1 style={styles.title}>Disclaimer</h1>
         <div style={styles.content}>
           <p style={styles.paragraph}>
-            The information provided on Daily Well Fact is for general informational purposes only and is not intended as medical advice. Always consult a qualified healthcare professional before making any changes to your diet, exercise, or wellness routine.
+            The information provided on Daily Well Fact is for general informational and educational purposes only. It is not intended as a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider with any questions you may have regarding a medical condition.
           </p>
-
           <p style={styles.paragraph}>
-            We strive to ensure the accuracy of our content, but we make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, or suitability of the information contained on this website. Any reliance you place on such information is strictly at your own risk.
+            We strive to ensure the accuracy of our content by sourcing from reliable and trusted references. However, we make no warranties or representations about the completeness, accuracy, or reliability of the information. Any reliance you place on such information is strictly at your own risk.
           </p>
-
           <p style={styles.paragraph}>
-            In no event will we be liable for any loss or damage arising from the use of this website, including but not limited to direct, indirect, incidental, or consequential damages.
-          </p>
-
-          <p style={styles.paragraph}>
-            External links are provided for convenience; we do not endorse or assume responsibility for the content of linked sites.
-          </p>
-
-          <p style={styles.paragraph}>
-            By using this site, you acknowledge and agree to these terms.
-          </p>
-
-          <p style={styles.paragraph}>
-            If you have any questions, please contact us at{' '}
-            <a href="mailto:info@dailywellfact.com" style={styles.link}>info@dailywellfact.com</a>.
+            We are not liable for any loss or damage arising from the use of this website. If you find any mistake or have any concerns about our content, please contact us at{' '}
+            <a href="mailto:dailyhabitfact@gmail.com" style={styles.link}>dailyhabitfact@gmail.com</a>. We appreciate your feedback and will strive to correct any errors promptly.
           </p>
         </div>
       </div>

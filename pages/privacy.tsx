@@ -11,43 +11,14 @@ const Privacy: NextPage = () => {
             <strong>Effective Date:</strong> March 23, 2026
           </p>
           <p style={styles.paragraph}>
-            At Daily Well Fact, we respect your privacy and are committed to protecting your personal data. This privacy policy explains how we collect, use, and safeguard your information when you visit our website.
+            At Daily Well Fact, we respect your privacy. <strong>We do not collect any personal data</strong> from our visitors. You can browse our site without creating an account, leaving any personal information, or worrying about cookies that track you.
           </p>
-
-          <h2 style={styles.subtitle}>Information We Collect</h2>
           <p style={styles.paragraph}>
-            We may collect personal information such as your name and email address if you voluntarily subscribe to our newsletter. We also collect non‑personal data like browser type, IP address, and pages visited through cookies and analytics tools.
+            We do not use newsletters, analytics that store personal data, or third‑party services that would compromise your privacy. The only time you may choose to share information is if you contact us directly via email.
           </p>
-
-          <h2 style={styles.subtitle}>How We Use Your Information</h2>
           <p style={styles.paragraph}>
-            Your information helps us improve our content, personalize your experience, and send you occasional updates. We never sell or share your data with third parties for marketing purposes.
-          </p>
-
-          <h2 style={styles.subtitle}>Cookies</h2>
-          <p style={styles.paragraph}>
-            We use cookies to enhance site functionality and analyze traffic. You can disable cookies in your browser settings, but some features may not work as intended.
-          </p>
-
-          <h2 style={styles.subtitle}>Third‑Party Links</h2>
-          <p style={styles.paragraph}>
-            Our website may contain links to external sites. We are not responsible for the privacy practices of those sites.
-          </p>
-
-          <h2 style={styles.subtitle}>Your Rights</h2>
-          <p style={styles.paragraph}>
-            You have the right to request access to, correction, or deletion of your personal data. To exercise these rights, please contact us at{' '}
-            <a href="mailto:privacy@dailywellfact.com" style={styles.link}>privacy@dailywellfact.com</a>.
-          </p>
-
-          <h2 style={styles.subtitle}>Changes to This Policy</h2>
-          <p style={styles.paragraph}>
-            We may update this policy from time to time. Any changes will be posted on this page with an updated effective date.
-          </p>
-
-          <p style={styles.paragraph}>
-            If you have any questions, please reach out at{' '}
-            <a href="mailto:privacy@dailywellfact.com" style={styles.link}>privacy@dailywellfact.com</a>.
+            If you have any questions about this policy, feel free to contact us at{' '}
+            <a href="mailto:dailyhabitfact@gmail.com" style={styles.link}>dailyhabitfact@gmail.com</a>.
           </p>
         </div>
       </div>
@@ -72,13 +43,6 @@ const styles = {
     fontSize: '1.125rem',
     lineHeight: 1.7,
     color: '#4b5563',
-  },
-  subtitle: {
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    marginTop: '2rem',
-    marginBottom: '1rem',
-    color: '#1f2937',
   },
   paragraph: {
     marginBottom: '1.5rem',
