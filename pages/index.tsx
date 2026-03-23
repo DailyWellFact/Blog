@@ -188,34 +188,32 @@ const Home: NextPage<Props> = ({ posts }) => {
         ) : (
           <>
             <div style={styles.grid}>
-              {visiblePosts.map((post) => (
-                <article key={post._id} style={styles.card}>
-                  {post.mainImage && (
-                    <Link href={`/post/${post.slug.current}`}>
-                      <a style={styles.imageLink}>
-                        <img
-                          src={urlFor(post.mainImage).width(600).url()}
-                          alt={post.title}
-                          className="card-image"
-                          style={styles.cardImage}
-                        />
-                      </a>
-                    </Link>
-                  )}
-                  <div style={styles.cardContent}>
-                    <Link href={`/post/${post.slug.current}`}>
-                      <a style={styles.cardTitle}>{post.title}</a>
-                    </Link>
-                    <p style={styles.cardMeta}>
-                      {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                </article>
-              ))}
+             {visiblePosts.map((post) => (
+  <Link key={post._id} href={`/post/${post.slug.current}`}>
+    <a style={{ textDecoration: 'none', color: 'inherit' }}>
+      <article style={styles.card}>
+        {post.mainImage && (
+          <img
+            src={urlFor(post.mainImage).width(600).url()}
+            alt={post.title}
+            className="card-image"
+            style={styles.cardImage}
+          />
+        )}
+        <div style={styles.cardContent}>
+          <h3 style={styles.cardTitle}>{post.title}</h3>
+          <p style={styles.cardMeta}>
+            {new Date(post.publishedAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </p>
+        </div>
+      </article>
+    </a>
+  </Link>
+))}
             </div>
             {hasMore && (
               <div style={styles.loadMoreContainer}>
@@ -232,6 +230,9 @@ const Home: NextPage<Props> = ({ posts }) => {
       </section>
 
       <style jsx>{`
+      article:hover {
+  transform: translateY(-5px);
+}
         @media (max-width: 768px) {
           .hero-title {
             font-size: 2rem !important;
@@ -475,6 +476,7 @@ const styles = {
     overflow: 'hidden',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     transition: 'transform 0.2s, box-shadow 0.2s',
+    cursor: 'pointer',
   },
   imageLink: {
     display: 'block',
