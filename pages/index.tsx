@@ -187,7 +187,7 @@ const Home: NextPage<Props> = ({ posts }) => {
             <div style={styles.grid}>
               {visiblePosts.map((post) => (
                 <Link key={post._id} href={`/post/${post.slug.current}`}>
-                  <a style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <a style={styles.cardLink}>
                     <article style={styles.card}>
                       {post.mainImage && (
                         <img
@@ -467,32 +467,37 @@ const styles = {
     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
     gap: '2rem',
   },
-  // ========== MODIFIED CARD STYLES ==========
+  // ========== CRITICAL: MAKE CARDS EQUAL HEIGHT ==========
+  cardLink: {
+    display: 'block',
+    height: '100%',
+    textDecoration: 'none',
+    color: 'inherit',
+  },
   card: {
     display: 'flex',
     flexDirection: 'column' as const,
+    height: '100%',              // Stretch to fill the grid cell
     backgroundColor: '#ffffff',
     borderRadius: '1rem',
     overflow: 'hidden',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     transition: 'transform 0.2s, box-shadow 0.2s',
     cursor: 'pointer',
-    // height is NOT fixed → determined by content, but flexbox stretches content area
   },
   cardImage: {
     width: '100%',
     height: 200,
-    flexShrink: 0,        // prevents image from shrinking
+    flexShrink: 0,
     objectFit: 'cover' as const,
     transition: 'transform 0.3s',
   },
   cardContent: {
-    flex: 1,               // takes all remaining space in the flex column
+    flex: 1,                    // Takes all remaining space in the card
     display: 'flex',
     flexDirection: 'column' as const,
     justifyContent: 'space-between' as const,
     padding: '1.5rem',
-    // no overflow hidden → full text is visible
   },
   cardTitle: {
     fontSize: '1.25rem',
@@ -500,10 +505,9 @@ const styles = {
     color: '#111827',
     textDecoration: 'none',
     marginBottom: '0.5rem',
-    // full text (no clamping)
     transition: 'color 0.2s',
   },
-  // ==========================================
+  // ================================================
   cardMeta: {
     fontSize: '0.875rem',
     color: '#6b7280',
