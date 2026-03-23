@@ -1,3 +1,4 @@
+// pages/index.tsx
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
@@ -15,10 +16,9 @@ interface Post {
 
 interface Props {
   posts: Post[];
-  featuredPost: Post | null;
 }
 
-const Home: NextPage<Props> = ({ posts, featuredPost }) => {
+const Home: NextPage<Props> = ({ posts }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Sort posts by date (newest first)
@@ -28,21 +28,18 @@ const Home: NextPage<Props> = ({ posts, featuredPost }) => {
     );
   }, [posts]);
 
-  // Filter posts based on search term (excluding featured)
+  // Filter posts based on search term
   const filteredPosts = useMemo(() => {
     if (!searchTerm.trim()) return sortedPosts;
     const term = searchTerm.toLowerCase();
     return sortedPosts.filter(post => post.title.toLowerCase().includes(term));
   }, [searchTerm, sortedPosts]);
 
-  // Featured post: if provided, else first sorted post
-  const featured = featuredPost || sortedPosts[0];
-  
-  // Recent posts: exclude featured and take up to 6 (if not searching)
-  const recentPosts = useMemo(() => {
-    if (searchTerm.trim()) return filteredPosts;
-    return filteredPosts.filter(post => post._id !== featured?._id).slice(0, 6);
-  }, [filteredPosts, featured, searchTerm]);
+  // Featured post: the newest (first in sorted list)
+  const featuredPost = filteredPosts[0];
+
+  // All posts except the featured one (for the main grid)
+  const otherPosts = filteredPosts.slice(1);
 
   return (
     <Layout>
@@ -67,7 +64,7 @@ const Home: NextPage<Props> = ({ posts, featuredPost }) => {
         </div>
         <div style={styles.heroImage}>
           <div style={styles.heroImagePlaceholder}>
-            {/* Illustration – replace with your own image */}
+            {/* Replace with your own illustration or image */}
             <svg width="100%" height="100%" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="400" height="300" fill="url(#gradient)" />
               <circle cx="200" cy="150" r="80" fill="white" fillOpacity="0.2" />
@@ -84,29 +81,29 @@ const Home: NextPage<Props> = ({ posts, featuredPost }) => {
       </section>
 
       {/* Featured Post */}
-      {featured && (
+      {featuredPost && (
         <section style={styles.featuredSection}>
           <div style={styles.featuredContainer}>
             <div style={styles.featuredContent}>
               <span style={styles.featuredBadge}>Featured Article</span>
-              <h2 style={styles.featuredTitle}>{featured.title}</h2>
+              <h2 style={styles.featuredTitle}>{featuredPost.title}</h2>
               <p style={styles.featuredMeta}>
-                By {featured.author || 'Anonymous'} •{' '}
-                {new Date(featured.publishedAt).toLocaleDateString('en-US', {
+                By {featuredPost.author || 'Anonymous'} •{' '}
+                {new Date(featuredPost.publishedAt).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })}
               </p>
-              <Link href={`/post/${featured.slug.current}`}>
+              <Link href={`/post/${featuredPost.slug.current}`}>
                 <a style={styles.featuredButton}>Read More →</a>
               </Link>
             </div>
-            {featured.mainImage && (
+            {featuredPost.mainImage && (
               <div style={styles.featuredImage}>
                 <img
-                  src={urlFor(featured.mainImage).width(600).url()}
-                  alt={featured.title}
+                  src={urlFor(featuredPost.mainImage).width(600).url()}
+                  alt={featuredPost.title}
                   style={styles.featuredImageStyle}
                 />
               </div>
@@ -147,23 +144,23 @@ const Home: NextPage<Props> = ({ posts, featuredPost }) => {
         </div>
       </div>
 
-      {/* Latest Posts Grid */}
+      {/* All Posts Grid */}
       <section id="latest" style={styles.latestSection}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>
-            {searchTerm ? 'Search Results' : 'Latest Insights'}
+            {searchTerm ? 'Search Results' : 'All Articles'}
           </h2>
           {!searchTerm && (
-            <p style={styles.sectionSubtitle}>Fresh wellness wisdom, updated daily</p>
+            <p style={styles.sectionSubtitle}>Explore our complete collection of wellness insights</p>
           )}
         </div>
-        <div style={styles.grid}>
-          {recentPosts.length === 0 ? (
-            <div style={styles.noResults}>
-              <p>No articles found matching "{searchTerm}".</p>
-            </div>
-          ) : (
-            recentPosts.map((post) => (
+        {otherPosts.length === 0 ? (
+          <div style={styles.noResults}>
+            <p>No articles found matching "{searchTerm}".</p>
+          </div>
+        ) : (
+          <div style={styles.grid}>
+            {otherPosts.map((post) => (
               <article key={post._id} style={styles.card}>
                 {post.mainImage && (
                   <Link href={`/post/${post.slug.current}`}>
@@ -189,14 +186,15 @@ const Home: NextPage<Props> = ({ posts, featuredPost }) => {
                   </p>
                 </div>
               </article>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </Layout>
   );
 };
 
+// Styles – all inline, modern and responsive
 const styles = {
   hero: {
     display: 'flex',
@@ -326,7 +324,7 @@ const styles = {
   searchContainer: {
     position: 'relative' as const,
     width: '100%',
-    maxWidth: 500,
+    maxWidth: '500px',
   },
   searchIcon: {
     position: 'absolute' as const,
@@ -438,9 +436,7 @@ export async function getStaticProps() {
     publishedAt
   }`;
   const posts = await client.fetch(query);
-  // Featured post: you can customize this – here we pick the first (newest after sort)
-  const featuredPost = posts.length ? posts[0] : null;
-  return { props: { posts, featuredPost } };
+  return { props: { posts } };
 }
 
 export default Home;
