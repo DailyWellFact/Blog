@@ -93,15 +93,15 @@ const Home: NextPage<Props> = ({ posts }) => {
         </div>
         <div style={styles.heroImage}>
           <div style={styles.heroImagePlaceholder}>
-<div style={styles.heroImage}>
-  <div style={styles.heroImagePlaceholder}>
-    <img 
-      src="/favicon.png" 
-      alt="Hero Image" 
-      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-    />
-  </div>
-</div>
+            <div style={styles.heroImage}>
+              <div style={styles.heroImagePlaceholder}>
+                <img 
+                  src="/favicon.png" 
+                  alt="Hero Image" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -188,32 +188,32 @@ const Home: NextPage<Props> = ({ posts }) => {
         ) : (
           <>
             <div style={styles.grid}>
-             {visiblePosts.map((post) => (
-  <Link key={post._id} href={`/post/${post.slug.current}`}>
-    <a style={{ textDecoration: 'none', color: 'inherit' }}>
-      <article style={styles.card}>
-        {post.mainImage && (
-          <img
-            src={urlFor(post.mainImage).width(600).url()}
-            alt={post.title}
-            className="card-image"
-            style={styles.cardImage}
-          />
-        )}
-        <div style={styles.cardContent}>
-          <h3 style={styles.cardTitle}>{post.title}</h3>
-          <p style={styles.cardMeta}>
-            {new Date(post.publishedAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
-          </p>
-        </div>
-      </article>
-    </a>
-  </Link>
-))}
+              {visiblePosts.map((post) => (
+                <Link key={post._id} href={`/post/${post.slug.current}`}>
+                  <a style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <article style={styles.card}>
+                      {post.mainImage && (
+                        <img
+                          src={urlFor(post.mainImage).width(600).url()}
+                          alt={post.title}
+                          className="card-image"
+                          style={styles.cardImage}
+                        />
+                      )}
+                      <div style={styles.cardContent}>
+                        <h3 style={styles.cardTitle}>{post.title}</h3>
+                        <p style={styles.cardMeta}>
+                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </p>
+                      </div>
+                    </article>
+                  </a>
+                </Link>
+              ))}
             </div>
             {hasMore && (
               <div style={styles.loadMoreContainer}>
@@ -230,9 +230,9 @@ const Home: NextPage<Props> = ({ posts }) => {
       </section>
 
       <style jsx>{`
-      article:hover {
-  transform: translateY(-5px);
-}
+        article:hover {
+          transform: translateY(-5px);
+        }
         @media (max-width: 768px) {
           .hero-title {
             font-size: 2rem !important;
@@ -470,7 +470,11 @@ const styles = {
     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
     gap: '2rem',
   },
+  // ========== MODIFIED CARD STYLES ==========
   card: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    height: 380,                       // fixed height for all cards
     backgroundColor: '#ffffff',
     borderRadius: '1rem',
     overflow: 'hidden',
@@ -478,27 +482,35 @@ const styles = {
     transition: 'transform 0.2s, box-shadow 0.2s',
     cursor: 'pointer',
   },
-  imageLink: {
-    display: 'block',
-  },
   cardImage: {
     width: '100%',
-    height: '200px',
+    height: 200,
+    flexShrink: 0,                     // prevents image from shrinking
     objectFit: 'cover' as const,
     transition: 'transform 0.3s',
   },
   cardContent: {
+    flex: 1,                           // takes remaining space after image
+    display: 'flex',
+    flexDirection: 'column' as const,
+    justifyContent: 'space-between' as const,
     padding: '1.5rem',
+    overflow: 'hidden',                // prevents content from overflowing fixed height
   },
   cardTitle: {
     fontSize: '1.25rem',
-    fontWeight: '600',
+    fontWeight: 600,
     color: '#111827',
     textDecoration: 'none',
     marginBottom: '0.5rem',
-    display: 'inline-block',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,                // limit title to 2 lines
+    WebkitBoxOrient: 'vertical' as const,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
     transition: 'color 0.2s',
   },
+  // ========================================
   cardMeta: {
     fontSize: '0.875rem',
     color: '#6b7280',
