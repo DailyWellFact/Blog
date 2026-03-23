@@ -29,6 +29,21 @@ const Home: NextPage<Props> = ({ posts }) => {
     );
   }, [posts]);
 
+  // Get the latest post published on a Thursday (or fallback to latest overall)
+  const featuredPost = useMemo(() => {
+    // Filter posts that are published on a Thursday (getDay() === 4)
+    const thursdayPosts = sortedPosts.filter(post => {
+      const date = new Date(post.publishedAt);
+      return date.getDay() === 4; // 4 = Thursday
+    });
+    if (thursdayPosts.length > 0) {
+      // Already sorted, so first is the latest Thursday post
+      return thursdayPosts[0];
+    }
+    // No Thursday posts, fallback to latest overall
+    return sortedPosts[0] || null;
+  }, [sortedPosts]);
+
   // Filter posts based on search term
   const filteredPosts = useMemo(() => {
     if (!searchTerm.trim()) return sortedPosts;
@@ -36,20 +51,20 @@ const Home: NextPage<Props> = ({ posts }) => {
     return sortedPosts.filter(post => post.title.toLowerCase().includes(term));
   }, [searchTerm, sortedPosts]);
 
-  // Featured post is the first of the filtered posts (if any)
-  const featuredPost = filteredPosts[0];
-
-  // All other posts (after featured)
-  const otherPosts = filteredPosts.slice(1);
+  // For the main grid: when searching, we use all filteredPosts; otherwise we exclude the featuredPost
+  const gridPosts = useMemo(() => {
+    if (searchTerm.trim()) return filteredPosts;
+    return filteredPosts.filter(post => post._id !== featuredPost?._id);
+  }, [searchTerm, filteredPosts, featuredPost]);
 
   // Reset visible count when search changes
   useMemo(() => {
     setVisibleCount(10);
   }, [searchTerm]);
 
-  // Slice for current page
-  const visiblePosts = otherPosts.slice(0, visibleCount);
-  const hasMore = visibleCount < otherPosts.length;
+  // Paginate the grid posts
+  const visiblePosts = gridPosts.slice(0, visibleCount);
+  const hasMore = visibleCount < gridPosts.length;
 
   const loadMore = () => {
     setVisibleCount(prev => prev + 10);
@@ -93,8 +108,8 @@ const Home: NextPage<Props> = ({ posts }) => {
         </div>
       </section>
 
-      {/* Featured Post */}
-      {featuredPost && (
+      {/* Featured Post – only shown when no search term */}
+      {!searchTerm && featuredPost && (
         <section style={styles.featuredSection}>
           <div style={styles.featuredContainer}>
             <div style={styles.featuredContent}>
