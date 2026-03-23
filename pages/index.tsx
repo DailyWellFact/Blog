@@ -1,3 +1,4 @@
+// pages/index.tsx
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
@@ -19,21 +20,40 @@ interface Props {
 
 const Home: NextPage<Props> = ({ posts }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [visibleCount, setVisibleCount] = useState(10);
 
+  // Sort posts by date (newest first)
   const sortedPosts = useMemo(() => {
     return [...posts].sort(
       (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
   }, [posts]);
 
+  // Filter posts based on search term
   const filteredPosts = useMemo(() => {
     if (!searchTerm.trim()) return sortedPosts;
     const term = searchTerm.toLowerCase();
     return sortedPosts.filter(post => post.title.toLowerCase().includes(term));
   }, [searchTerm, sortedPosts]);
 
+  // Featured post is the first of the filtered posts (if any)
   const featuredPost = filteredPosts[0];
+
+  // All other posts (after featured)
   const otherPosts = filteredPosts.slice(1);
+
+  // Reset visible count when search changes
+  useMemo(() => {
+    setVisibleCount(10);
+  }, [searchTerm]);
+
+  // Slice for current page
+  const visiblePosts = otherPosts.slice(0, visibleCount);
+  const hasMore = visibleCount < otherPosts.length;
+
+  const loadMore = () => {
+    setVisibleCount(prev => prev + 10);
+  };
 
   return (
     <Layout>
@@ -56,15 +76,21 @@ const Home: NextPage<Props> = ({ posts }) => {
             </Link>
           </div>
         </div>
-     <div style={styles.heroImage}>
-  <div style={styles.heroImagePlaceholder}>
-    <img 
-      src="/favicon.png" 
-      alt="Hero Image" 
-      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-    />
-  </div>
-</div>
+        <div style={styles.heroImage}>
+          <div style={styles.heroImagePlaceholder}>
+            <svg width="100%" height="100%" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="400" height="300" fill="url(#gradient)" />
+              <circle cx="200" cy="150" r="80" fill="white" fillOpacity="0.2" />
+              <path d="M200 100 L220 150 L200 200 L180 150 Z" fill="white" fillOpacity="0.6" />
+              <defs>
+                <linearGradient id="gradient" x1="0" y1="0" x2="400" y2="300" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#10b981" />
+                  <stop offset="1" stopColor="#059669" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
       </section>
 
       {/* Featured Post */}
@@ -142,45 +168,56 @@ const Home: NextPage<Props> = ({ posts }) => {
             <p className="section-subtitle" style={styles.sectionSubtitle}>Explore our complete collection of wellness insights</p>
           )}
         </div>
-        {otherPosts.length === 0 ? (
+        {visiblePosts.length === 0 ? (
           <div style={styles.noResults}>
             <p>No articles found matching "{searchTerm}".</p>
           </div>
         ) : (
-          <div style={styles.grid}>
-            {otherPosts.map((post) => (
-              <article key={post._id} style={styles.card}>
-                {post.mainImage && (
-                  <Link href={`/post/${post.slug.current}`}>
-                    <a style={styles.imageLink}>
-                      <img
-                        src={urlFor(post.mainImage).width(600).url()}
-                        alt={post.title}
-                        className="card-image"
-                        style={styles.cardImage}
-                      />
-                    </a>
-                  </Link>
-                )}
-                <div style={styles.cardContent}>
-                  <Link href={`/post/${post.slug.current}`}>
-                    <a style={styles.cardTitle}>{post.title}</a>
-                  </Link>
-                  <p style={styles.cardMeta}>
-                    {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </p>
-                </div>
-              </article>
-            ))}
-          </div>
+          <>
+            <div style={styles.grid}>
+              {visiblePosts.map((post) => (
+                <article key={post._id} style={styles.card}>
+                  {post.mainImage && (
+                    <Link href={`/post/${post.slug.current}`}>
+                      <a style={styles.imageLink}>
+                        <img
+                          src={urlFor(post.mainImage).width(600).url()}
+                          alt={post.title}
+                          className="card-image"
+                          style={styles.cardImage}
+                        />
+                      </a>
+                    </Link>
+                  )}
+                  <div style={styles.cardContent}>
+                    <Link href={`/post/${post.slug.current}`}>
+                      <a style={styles.cardTitle}>{post.title}</a>
+                    </Link>
+                    <p style={styles.cardMeta}>
+                      {new Date(post.publishedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+            {hasMore && (
+              <div style={styles.loadMoreContainer}>
+                <button onClick={loadMore} style={styles.loadMoreButton}>
+                  Load More
+                </button>
+              </div>
+            )}
+            {!hasMore && visiblePosts.length > 0 && (
+              <p style={styles.endMessage}>You've reached the end 🎉</p>
+            )}
+          </>
         )}
       </section>
 
-      {/* Responsive styles via CSS-in-JS */}
       <style jsx>{`
         @media (max-width: 768px) {
           .hero-title {
@@ -227,7 +264,6 @@ const Home: NextPage<Props> = ({ posts }) => {
   );
 };
 
-// Styles object (unchanged, but added !important will override as needed)
 const styles = {
   hero: {
     display: 'flex',
@@ -456,6 +492,27 @@ const styles = {
     padding: '3rem',
     color: '#6b7280',
     fontSize: '1.125rem',
+  },
+  loadMoreContainer: {
+    textAlign: 'center' as const,
+    marginTop: '2rem',
+  },
+  loadMoreButton: {
+    backgroundColor: '#10b981',
+    color: '#ffffff',
+    padding: '0.75rem 2rem',
+    borderRadius: '2rem',
+    border: 'none',
+    fontSize: '1rem',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+  },
+  endMessage: {
+    textAlign: 'center' as const,
+    marginTop: '2rem',
+    color: '#6b7280',
+    fontSize: '0.875rem',
   },
 };
 
