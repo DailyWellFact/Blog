@@ -1,4 +1,3 @@
-// pages/index.tsx
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
@@ -21,56 +20,57 @@ interface Props {
 const Home: NextPage<Props> = ({ posts }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Sort posts by date (newest first)
   const sortedPosts = useMemo(() => {
     return [...posts].sort(
       (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
   }, [posts]);
 
-  // Filter posts based on search term
   const filteredPosts = useMemo(() => {
     if (!searchTerm.trim()) return sortedPosts;
     const term = searchTerm.toLowerCase();
     return sortedPosts.filter(post => post.title.toLowerCase().includes(term));
   }, [searchTerm, sortedPosts]);
 
-  // Featured post: the newest (first in sorted list)
   const featuredPost = filteredPosts[0];
-
-  // All posts except the featured one (for the main grid)
   const otherPosts = filteredPosts.slice(1);
 
   return (
     <Layout>
       {/* Hero Section */}
-      <section style={styles.hero}>
+      <section className="hero" style={styles.hero}>
         <div style={styles.heroContent}>
-          <h1 style={styles.heroTitle}>
+          <h1 className="hero-title" style={styles.heroTitle}>
             Small Habits,<br />
             <span style={styles.heroHighlight}>Big Wellness</span>
           </h1>
-          <p style={styles.heroSubtitle}>
+          <p className="hero-subtitle" style={styles.heroSubtitle}>
             Science-backed wellness insights delivered daily. Start your journey to a healthier you.
           </p>
           <div style={styles.heroButtons}>
             <Link href="#latest">
-              <a style={styles.primaryButton}>Explore Articles</a>
+              <a className="primary-button" style={styles.primaryButton}>Explore Articles</a>
             </Link>
             <Link href="/about">
-              <a style={styles.secondaryButton}>Learn More</a>
+              <a className="secondary-button" style={styles.secondaryButton}>Learn More</a>
             </Link>
           </div>
         </div>
-    <div style={styles.heroImage}>
-  <div style={styles.heroImagePlaceholder}>
-    <img 
-      src="/favicon.png" 
-      alt="Hero Image" 
-      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-    />
-  </div>
-</div>
+        <div style={styles.heroImage}>
+          <div style={styles.heroImagePlaceholder}>
+            <svg width="100%" height="100%" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="400" height="300" fill="url(#gradient)" />
+              <circle cx="200" cy="150" r="80" fill="white" fillOpacity="0.2" />
+              <path d="M200 100 L220 150 L200 200 L180 150 Z" fill="white" fillOpacity="0.6" />
+              <defs>
+                <linearGradient id="gradient" x1="0" y1="0" x2="400" y2="300" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#10b981" />
+                  <stop offset="1" stopColor="#059669" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
       </section>
 
       {/* Featured Post */}
@@ -79,7 +79,7 @@ const Home: NextPage<Props> = ({ posts }) => {
           <div style={styles.featuredContainer}>
             <div style={styles.featuredContent}>
               <span style={styles.featuredBadge}>Featured Article</span>
-              <h2 style={styles.featuredTitle}>{featuredPost.title}</h2>
+              <h2 className="featured-title" style={styles.featuredTitle}>{featuredPost.title}</h2>
               <p style={styles.featuredMeta}>
                 By {featuredPost.author || 'Anonymous'} •{' '}
                 {new Date(featuredPost.publishedAt).toLocaleDateString('en-US', {
@@ -127,6 +127,7 @@ const Home: NextPage<Props> = ({ posts }) => {
             placeholder="Search articles..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
             style={styles.searchInput}
           />
           {searchTerm && (
@@ -140,11 +141,11 @@ const Home: NextPage<Props> = ({ posts }) => {
       {/* All Posts Grid */}
       <section id="latest" style={styles.latestSection}>
         <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle}>
+          <h2 className="section-title" style={styles.sectionTitle}>
             {searchTerm ? 'Search Results' : 'All Articles'}
           </h2>
           {!searchTerm && (
-            <p style={styles.sectionSubtitle}>Explore our complete collection of wellness insights</p>
+            <p className="section-subtitle" style={styles.sectionSubtitle}>Explore our complete collection of wellness insights</p>
           )}
         </div>
         {otherPosts.length === 0 ? (
@@ -161,6 +162,7 @@ const Home: NextPage<Props> = ({ posts }) => {
                       <img
                         src={urlFor(post.mainImage).width(600).url()}
                         alt={post.title}
+                        className="card-image"
                         style={styles.cardImage}
                       />
                     </a>
@@ -183,11 +185,55 @@ const Home: NextPage<Props> = ({ posts }) => {
           </div>
         )}
       </section>
+
+      {/* Responsive styles via CSS-in-JS */}
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .hero-title {
+            font-size: 2rem !important;
+          }
+          .hero-subtitle {
+            font-size: 1rem !important;
+          }
+          .section-title {
+            font-size: 1.75rem !important;
+          }
+          .section-subtitle {
+            font-size: 1rem !important;
+          }
+          .featured-title {
+            font-size: 1.5rem !important;
+          }
+          .card-image {
+            height: 160px !important;
+          }
+          .primary-button,
+          .secondary-button {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.875rem !important;
+          }
+          .search-input {
+            font-size: 0.875rem !important;
+            padding: 0.5rem 1rem 0.5rem 2rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .hero-title {
+            font-size: 1.75rem !important;
+          }
+          .section-title {
+            font-size: 1.5rem !important;
+          }
+          .card-image {
+            height: 140px !important;
+          }
+        }
+      `}</style>
     </Layout>
   );
 };
 
-// Styles – all inline, modern and responsive
+// Styles object (unchanged, but added !important will override as needed)
 const styles = {
   hero: {
     display: 'flex',
