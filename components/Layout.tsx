@@ -36,12 +36,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Link href="/privacy"><a style={styles.footerLink}>Privacy Policy</a></Link>
             <Link href="/disclaimer"><a style={styles.footerLink}>Disclaimer</a></Link>
           </div>
-          <div style={styles.footerColumn}>
-            <h4 style={styles.footerHeading}>Connect</h4>
-            <a href="#" style={styles.footerLink}>Twitter</a>
-            <a href="#" style={styles.footerLink}>Instagram</a>
-            <a href="#" style={styles.footerLink}>Newsletter</a>
-          </div>
         </div>
         <div style={styles.copyright}>
           <p>© {new Date().getFullYear()} Daily Well Fact. All rights reserved.</p>

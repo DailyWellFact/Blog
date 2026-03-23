@@ -1,5 +1,6 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import { useState, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { client, urlFor } from '../lib/sanity';
 
@@ -17,9 +18,18 @@ interface Props {
 }
 
 const Home: NextPage<Props> = ({ posts }) => {
-  // Get the first three posts for featured, rest for regular
-  const featuredPosts = posts.slice(0, 3);
-  const regularPosts = posts.slice(3);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter posts based on search term
+  const filteredPosts = useMemo(() => {
+    if (!searchTerm.trim()) return posts;
+    const term = searchTerm.toLowerCase();
+    return posts.filter(post => post.title.toLowerCase().includes(term));
+  }, [searchTerm, posts]);
+
+  // Mark first three posts as featured (only when not searching)
+  const isSearching = searchTerm.trim() !== '';
+  const showFeaturedBadge = !isSearching;
 
   return (
     <Layout>
@@ -36,13 +46,60 @@ const Home: NextPage<Props> = ({ posts }) => {
         </div>
       </section>
 
-      {/* Featured Posts Grid */}
-      {featuredPosts.length > 0 && (
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Featured Articles</h2>
-          <div style={styles.featuredGrid}>
-            {featuredPosts.map((post, idx) => (
-              <article key={post._id} style={{ ...styles.card, ...(idx === 0 && styles.featuredCard) }}>
+      {/* Search Bar */}
+      <div style={styles.searchSection}>
+        <div style={styles.searchContainer}>
+          <svg
+            style={styles.searchIcon}
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search articles..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={styles.searchInput}
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              style={styles.clearButton}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Posts Grid */}
+      <section style={styles.section}>
+        <div style={styles.postsGrid}>
+          {filteredPosts.length === 0 ? (
+            <div style={styles.noResults}>
+              <p>No articles found matching "{searchTerm}".</p>
+            </div>
+          ) : (
+            filteredPosts.map((post, idx) => (
+              <article
+                key={post._id}
+                style={{
+                  ...styles.card,
+                  ...(showFeaturedBadge && idx < 3 && styles.featuredCard),
+                }}
+              >
+                {showFeaturedBadge && idx < 3 && (
+                  <div style={styles.featuredBadge}>Featured</div>
+                )}
                 <Link href={`/post/${post.slug.current}`}>
                   <a style={styles.cardLink}>
                     {post.mainImage && (
@@ -67,46 +124,10 @@ const Home: NextPage<Props> = ({ posts }) => {
                   </a>
                 </Link>
               </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* All Posts Grid */}
-      {regularPosts.length > 0 && (
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Latest Articles</h2>
-          <div style={styles.postsGrid}>
-            {regularPosts.map((post) => (
-              <article key={post._id} style={styles.card}>
-                <Link href={`/post/${post.slug.current}`}>
-                  <a style={styles.cardLink}>
-                    {post.mainImage && (
-                      <div style={styles.cardImageWrapper}>
-                        <img
-                          src={urlFor(post.mainImage).width(400).url()}
-                          alt={post.title}
-                          style={styles.cardImage}
-                        />
-                      </div>
-                    )}
-                    <div style={styles.cardContent}>
-                      <h3 style={styles.cardTitle}>{post.title}</h3>
-                      <p style={styles.cardMeta}>
-                        {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </p>
-                    </div>
-                  </a>
-                </Link>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
+            ))
+          )}
+        </div>
+      </section>
     </Layout>
   );
 };
@@ -116,7 +137,7 @@ const styles = {
     background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
     borderRadius: '2rem',
     padding: '4rem 2rem',
-    marginBottom: '4rem',
+    marginBottom: '3rem',
     textAlign: 'center' as const,
   },
   heroContent: {
@@ -144,20 +165,56 @@ const styles = {
     margin: '0 auto',
     lineHeight: 1.6,
   },
+  searchSection: {
+    marginBottom: '3rem',
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  searchContainer: {
+    position: 'relative' as const,
+    width: '100%',
+    maxWidth: 500,
+  },
+  searchIcon: {
+    position: 'absolute' as const,
+    left: '1rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: 20,
+    height: 20,
+    color: '#9ca3af',
+    pointerEvents: 'none' as const,
+  },
+  searchInput: {
+    width: '100%',
+    padding: '0.75rem 1rem 0.75rem 2.5rem',
+    fontSize: '1rem',
+    border: '1px solid #e5e7eb',
+    borderRadius: '2rem',
+    outline: 'none',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+    fontFamily: 'inherit',
+    backgroundColor: '#ffffff',
+  },
+  clearButton: {
+    position: 'absolute' as const,
+    right: '1rem',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    color: '#9ca3af',
+    padding: '0.25rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '50%',
+    transition: 'background 0.2s',
+  },
   section: {
     marginBottom: '4rem',
-  },
-  sectionTitle: {
-    fontSize: '2rem',
-    fontWeight: 700,
-    marginBottom: '2rem',
-    color: '#1f2937',
-    letterSpacing: '-0.01em',
-  },
-  featuredGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '2rem',
   },
   postsGrid: {
     display: 'grid',
@@ -165,6 +222,7 @@ const styles = {
     gap: '2rem',
   },
   card: {
+    position: 'relative' as const,
     backgroundColor: '#ffffff',
     borderRadius: '1rem',
     overflow: 'hidden',
@@ -174,6 +232,18 @@ const styles = {
   featuredCard: {
     transform: 'scale(1.02)',
     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+  },
+  featuredBadge: {
+    position: 'absolute' as const,
+    top: '1rem',
+    left: '1rem',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    color: 'white',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '2rem',
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    zIndex: 1,
   },
   cardLink: {
     textDecoration: 'none',
@@ -203,6 +273,12 @@ const styles = {
   cardMeta: {
     fontSize: '0.875rem',
     color: '#6b7280',
+  },
+  noResults: {
+    textAlign: 'center' as const,
+    padding: '3rem',
+    color: '#6b7280',
+    fontSize: '1.125rem',
   },
 };
 
