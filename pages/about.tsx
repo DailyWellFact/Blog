@@ -28,10 +28,11 @@ const styles = {
     margin: '0 auto',
   },
   title: {
-    fontSize: '2.5rem',
-    fontWeight: 'bold',
-    marginBottom: '1.5rem',
+    fontSize: '3rem',
+    fontWeight: 800,
+    marginBottom: '2rem',
     color: '#1f2937',
+    letterSpacing: '-0.02em',
   },
   content: {
     fontSize: '1.125rem',

@@ -99,9 +99,9 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
                     </Link>
                     <p style={styles.relatedCardMeta}>
                       {new Date(related.publishedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
                         month: 'short',
                         day: 'numeric',
+                        year: 'numeric',
                       })}
                     </p>
                   </div>
@@ -125,23 +125,25 @@ const styles = {
     marginBottom: '2rem',
     color: '#10b981',
     textDecoration: 'none',
-    fontWeight: '500',
+    fontWeight: 500,
   },
   title: {
-    fontSize: '2.5rem',
-    fontWeight: 'bold',
+    fontSize: '3rem',
+    fontWeight: 800,
     color: '#111827',
-    marginBottom: '0.5rem',
+    marginBottom: '1rem',
+    letterSpacing: '-0.02em',
+    lineHeight: 1.2,
   },
   meta: {
     fontSize: '0.875rem',
     color: '#6b7280',
-    marginBottom: '1.5rem',
+    marginBottom: '2rem',
   },
   featuredImage: {
     width: '100%',
     height: 'auto',
-    borderRadius: '0.75rem',
+    borderRadius: '1rem',
     marginBottom: '2rem',
   },
   content: {
@@ -151,27 +153,27 @@ const styles = {
   },
   blogImage: {
     width: '100%',
-    margin: '1.5rem 0',
-    borderRadius: '0.5rem',
+    margin: '2rem 0',
+    borderRadius: '0.75rem',
   },
   link: {
     color: '#10b981',
     textDecoration: 'underline',
   },
   paragraph: {
-    marginBottom: '1.25rem',
+    marginBottom: '1.5rem',
   },
   h2: {
     fontSize: '1.875rem',
-    fontWeight: 'bold',
-    marginTop: '2rem',
+    fontWeight: 700,
+    marginTop: '2.5rem',
     marginBottom: '1rem',
     color: '#111827',
   },
   h3: {
     fontSize: '1.5rem',
-    fontWeight: 'bold',
-    marginTop: '1.5rem',
+    fontWeight: 600,
+    marginTop: '2rem',
     marginBottom: '0.75rem',
     color: '#111827',
   },
@@ -182,20 +184,20 @@ const styles = {
   },
   relatedTitle: {
     fontSize: '1.75rem',
-    fontWeight: 'bold',
+    fontWeight: 700,
     marginBottom: '1.5rem',
     color: '#1f2937',
   },
   relatedGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-    gap: '1.5rem',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+    gap: '2rem',
   },
   relatedCard: {
     backgroundColor: '#ffffff',
-    borderRadius: '0.75rem',
+    borderRadius: '1rem',
     overflow: 'hidden',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
     transition: 'transform 0.2s, box-shadow 0.2s',
   },
   relatedImageLink: {
@@ -203,7 +205,7 @@ const styles = {
   },
   relatedImage: {
     width: '100%',
-    height: '160px',
+    height: '180px',
     objectFit: 'cover' as const,
   },
   relatedCardContent: {
@@ -211,7 +213,7 @@ const styles = {
   },
   relatedCardTitle: {
     fontSize: '1rem',
-    fontWeight: '600',
+    fontWeight: 600,
     color: '#111827',
     textDecoration: 'none',
     display: 'inline-block',
@@ -235,7 +237,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  // Fetch the current post
   const query = `*[_type == "post" && slug.current == $slug][0]{
     _id,
     title,
@@ -247,7 +248,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }`;
   const post = await client.fetch(query, { slug: params?.slug });
 
-  // Fetch all posts for related suggestions
   const allPostsQuery = `*[_type == "post"]{
     _id,
     title,
@@ -258,7 +258,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }`;
   const allPosts = await client.fetch(allPostsQuery);
 
-  // Exclude current post and pick up to 3 random ones
   const otherPosts = allPosts.filter((p: Post) => p._id !== post?._id);
   const shuffled = otherPosts.sort(() => 0.5 - Math.random());
   const relatedPosts = shuffled.slice(0, 3);
