@@ -337,7 +337,7 @@ const styles = {
     maxWidth: '400px',
   },
   heroImagePlaceholder: {
-    width: '100%',
+    width: '70%',
     height: 'auto',
     borderRadius: '1rem',
     overflow: 'hidden',
