@@ -93,17 +93,15 @@ const Home: NextPage<Props> = ({ posts }) => {
         </div>
         <div style={styles.heroImage}>
           <div style={styles.heroImagePlaceholder}>
-            <svg width="100%" height="100%" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="400" height="300" fill="url(#gradient)" />
-              <circle cx="200" cy="150" r="80" fill="white" fillOpacity="0.2" />
-              <path d="M200 100 L220 150 L200 200 L180 150 Z" fill="white" fillOpacity="0.6" />
-              <defs>
-                <linearGradient id="gradient" x1="0" y1="0" x2="400" y2="300" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#10b981" />
-                  <stop offset="1" stopColor="#059669" />
-                </linearGradient>
-              </defs>
-            </svg>
+<div style={styles.heroImage}>
+  <div style={styles.heroImagePlaceholder}>
+    <img 
+      src="/favicon.png" 
+      alt="Hero Image" 
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+    />
+  </div>
+</div>
           </div>
         </div>
       </section>
@@ -343,6 +341,7 @@ const styles = {
     height: 'auto',
     borderRadius: '1rem',
     overflow: 'hidden',
+    border: '4px solid #22c55e', // green border
   },
   featuredSection: {
     marginBottom: '4rem',
