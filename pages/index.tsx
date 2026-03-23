@@ -31,16 +31,13 @@ const Home: NextPage<Props> = ({ posts }) => {
 
   // Get the latest post published on a Thursday (or fallback to latest overall)
   const featuredPost = useMemo(() => {
-    // Filter posts that are published on a Thursday (getDay() === 4)
     const thursdayPosts = sortedPosts.filter(post => {
       const date = new Date(post.publishedAt);
       return date.getDay() === 4; // 4 = Thursday
     });
     if (thursdayPosts.length > 0) {
-      // Already sorted, so first is the latest Thursday post
       return thursdayPosts[0];
     }
-    // No Thursday posts, fallback to latest overall
     return sortedPosts[0] || null;
   }, [sortedPosts]);
 
@@ -342,7 +339,7 @@ const styles = {
     height: 'auto',
     borderRadius: '1rem',
     overflow: 'hidden',
-    border: '4px solid #22c55e', // green border
+    border: '4px solid #22c55e',
   },
   featuredSection: {
     marginBottom: '4rem',
@@ -474,28 +471,28 @@ const styles = {
   card: {
     display: 'flex',
     flexDirection: 'column' as const,
-    height: 380,                       // fixed height for all cards
     backgroundColor: '#ffffff',
     borderRadius: '1rem',
     overflow: 'hidden',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     transition: 'transform 0.2s, box-shadow 0.2s',
     cursor: 'pointer',
+    // height is NOT fixed → determined by content, but flexbox stretches content area
   },
   cardImage: {
     width: '100%',
     height: 200,
-    flexShrink: 0,                     // prevents image from shrinking
+    flexShrink: 0,        // prevents image from shrinking
     objectFit: 'cover' as const,
     transition: 'transform 0.3s',
   },
   cardContent: {
-    flex: 1,                           // takes remaining space after image
+    flex: 1,               // takes all remaining space in the flex column
     display: 'flex',
     flexDirection: 'column' as const,
     justifyContent: 'space-between' as const,
     padding: '1.5rem',
-    overflow: 'hidden',                // prevents content from overflowing fixed height
+    // no overflow hidden → full text is visible
   },
   cardTitle: {
     fontSize: '1.25rem',
@@ -503,14 +500,10 @@ const styles = {
     color: '#111827',
     textDecoration: 'none',
     marginBottom: '0.5rem',
-    display: '-webkit-box',
-    WebkitLineClamp: 2,                // limit title to 2 lines
-    WebkitBoxOrient: 'vertical' as const,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
+    // full text (no clamping)
     transition: 'color 0.2s',
   },
-  // ========================================
+  // ==========================================
   cardMeta: {
     fontSize: '0.875rem',
     color: '#6b7280',
