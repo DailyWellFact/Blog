@@ -8,7 +8,7 @@ const Privacy: NextPage = () => {
         <h1 style={styles.title}>Privacy Policy</h1>
         <div style={styles.content}>
           <p style={styles.paragraph}>
-            <strong>Effective Date:</strong> March 23, 2026
+            <strong>Effective Date:</strong> March 20, 2026
           </p>
           <p style={styles.paragraph}>
             At Daily Well Fact, we respect your privacy. <strong>We do not collect any personal data</strong> from our visitors. You can browse our site without creating an account, leaving any personal information, or worrying about cookies that track you.
