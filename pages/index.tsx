@@ -1,4 +1,3 @@
-// pages/index.tsx
 import type { NextPage } from 'next';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
@@ -90,15 +89,11 @@ const Home: NextPage<Props> = ({ posts }) => {
         </div>
         <div style={styles.heroImage}>
           <div style={styles.heroImagePlaceholder}>
-            <div style={styles.heroImage}>
-              <div style={styles.heroImagePlaceholder}>
-                <img 
-                  src="/hero.png" 
-                  alt="Hero Image" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                />
-              </div>
-            </div>
+            <img 
+              src="/hero.png" 
+              alt="Hero Image" 
+              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '1rem' }} 
+            />
           </div>
         </div>
       </section>
@@ -227,9 +222,34 @@ const Home: NextPage<Props> = ({ posts }) => {
       </section>
 
       <style jsx>{`
+        /* Global hover effect */
         article:hover {
           transform: translateY(-5px);
         }
+
+        /* Featured section responsive */
+        @media (max-width: 768px) {
+          .featured-container {
+            flex-direction: column !important;
+            text-align: center;
+            padding: 1.5rem !important;
+          }
+          .featured-content {
+            min-width: auto !important;
+            width: 100%;
+          }
+          .featured-image {
+            min-width: auto !important;
+            max-width: 100% !important;
+          }
+          .featured-title {
+            font-size: 1.5rem !important;
+          }
+          .featured-badge {
+            font-size: 0.7rem !important;
+          }
+        }
+
         @media (max-width: 768px) {
           .hero-title {
             font-size: 2rem !important;
@@ -242,9 +262,6 @@ const Home: NextPage<Props> = ({ posts }) => {
           }
           .section-subtitle {
             font-size: 1rem !important;
-          }
-          .featured-title {
-            font-size: 1.5rem !important;
           }
           .card-image {
             height: 160px !important;
@@ -259,6 +276,7 @@ const Home: NextPage<Props> = ({ posts }) => {
             padding: 0.5rem 1rem 0.5rem 2rem !important;
           }
         }
+
         @media (max-width: 480px) {
           .hero-title {
             font-size: 1.75rem !important;
@@ -467,7 +485,6 @@ const styles = {
     gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
     gap: '2rem',
   },
-  // ========== CRITICAL: MAKE CARDS EQUAL HEIGHT ==========
   cardLink: {
     display: 'block',
     height: '100%',
@@ -477,7 +494,7 @@ const styles = {
   card: {
     display: 'flex',
     flexDirection: 'column' as const,
-    height: '100%',              // Stretch to fill the grid cell
+    height: '100%',
     backgroundColor: '#ffffff',
     borderRadius: '1rem',
     overflow: 'hidden',
@@ -493,7 +510,7 @@ const styles = {
     transition: 'transform 0.3s',
   },
   cardContent: {
-    flex: 1,                    // Takes all remaining space in the card
+    flex: 1,
     display: 'flex',
     flexDirection: 'column' as const,
     justifyContent: 'space-between' as const,
@@ -507,7 +524,6 @@ const styles = {
     marginBottom: '0.5rem',
     transition: 'color 0.2s',
   },
-  // ================================================
   cardMeta: {
     fontSize: '0.875rem',
     color: '#6b7280',
