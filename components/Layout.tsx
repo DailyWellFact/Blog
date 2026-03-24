@@ -19,14 +19,34 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <a style={styles.logo}>Daily Well Fact</a>
           </Link>
 
-          {/* Hamburger button - visible on mobile */}
-          <button onClick={toggleMenu} style={styles.hamburger} aria-label="Menu">
-            <div style={{ ...styles.hamburgerLine, transform: isMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
-            <div style={{ ...styles.hamburgerLine, opacity: isMenuOpen ? 0 : 1 }} />
-            <div style={{ ...styles.hamburgerLine, transform: isMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }} />
+          {/* Hamburger button - hidden on desktop */}
+          <button
+            onClick={toggleMenu}
+            style={styles.hamburger}
+            className="hamburger"
+            aria-label="Menu"
+          >
+            <div
+              style={{
+                ...styles.hamburgerLine,
+                transform: isMenuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none',
+              }}
+            />
+            <div
+              style={{
+                ...styles.hamburgerLine,
+                opacity: isMenuOpen ? 0 : 1,
+              }}
+            />
+            <div
+              style={{
+                ...styles.hamburgerLine,
+                transform: isMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none',
+              }}
+            />
           </button>
 
-          {/* Navigation - class based for responsiveness */}
+          {/* Navigation */}
           <nav className={`nav ${isMenuOpen ? 'nav-open' : ''}`}>
             <Link href="/"><a style={styles.navLink} onClick={closeMenu}>Home</a></Link>
             <Link href="/about"><a style={styles.navLink} onClick={closeMenu}>About</a></Link>
@@ -65,7 +85,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </footer>
 
       <style jsx>{`
-        /* Desktop styles */
+        /* Desktop navigation */
         .nav {
           display: flex;
           gap: 2rem;
@@ -73,6 +93,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         /* Mobile styles */
         @media (max-width: 768px) {
+          .hamburger {
+            display: flex !important;
+          }
           .nav {
             display: none;
             flex-direction: column;
@@ -91,7 +114,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           }
         }
 
+        /* Hide hamburger on desktop */
         @media (min-width: 769px) {
+          .hamburger {
+            display: none !important;
+          }
           .nav {
             display: flex !important;
           }
