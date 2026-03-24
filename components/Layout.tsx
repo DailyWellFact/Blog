@@ -5,6 +5,9 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+// FIX: deterministic year
+const currentYear = new Date().getFullYear();
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -15,11 +18,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <Link href="/">
-            <a style={styles.logo}>Daily Well Fact</a>
+          {/* FIX: modern Link usage */}
+          <Link href="/" style={styles.logo}>
+            Daily Well Fact
           </Link>
 
-          {/* Hamburger button - hidden on desktop */}
           <button
             onClick={toggleMenu}
             style={styles.hamburger}
@@ -46,13 +49,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             />
           </button>
 
-          {/* Navigation */}
           <nav className={`nav ${isMenuOpen ? 'nav-open' : ''}`}>
-            <Link href="/"><a style={styles.navLink} onClick={closeMenu}>Home</a></Link>
-            <Link href="/about"><a style={styles.navLink} onClick={closeMenu}>About</a></Link>
-            <Link href="/contact"><a style={styles.navLink} onClick={closeMenu}>Contact</a></Link>
-            <Link href="/privacy"><a style={styles.navLink} onClick={closeMenu}>Privacy</a></Link>
-            <Link href="/disclaimer"><a style={styles.navLink} onClick={closeMenu}>Disclaimer</a></Link>
+            <Link href="/" style={styles.navLink} onClick={closeMenu}>Home</Link>
+            <Link href="/about" style={styles.navLink} onClick={closeMenu}>About</Link>
+            <Link href="/contact" style={styles.navLink} onClick={closeMenu}>Contact</Link>
+            <Link href="/privacy" style={styles.navLink} onClick={closeMenu}>Privacy</Link>
+            <Link href="/disclaimer" style={styles.navLink} onClick={closeMenu}>Disclaimer</Link>
           </nav>
         </div>
       </header>
@@ -67,31 +69,35 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               Your daily dose of science-backed wellness insights.
             </p>
           </div>
+
           <div style={styles.footerColumn}>
             <h4 style={styles.footerHeading}>Quick Links</h4>
-            <Link href="/about"><a style={styles.footerLink}>About Us</a></Link>
-            <Link href="/contact"><a style={styles.footerLink}>Contact</a></Link>
-            <Link href="/privacy"><a style={styles.footerLink}>Privacy Policy</a></Link>
-            <Link href="/disclaimer"><a style={styles.footerLink}>Disclaimer</a></Link>
+            <Link href="/about" style={styles.footerLink}>About Us</Link>
+            <Link href="/contact" style={styles.footerLink}>Contact</Link>
+            <Link href="/privacy" style={styles.footerLink}>Privacy Policy</Link>
+            <Link href="/disclaimer" style={styles.footerLink}>Disclaimer</Link>
           </div>
+
           <div style={styles.footerColumn}>
             <h4 style={styles.footerHeading}>Connect</h4>
-            <a href="mailto:dailyhabitfact@gmail.com" style={styles.footerLink}>Email Us</a>
+            <a href="mailto:dailyhabitfact@gmail.com" style={styles.footerLink}>
+              Email Us
+            </a>
           </div>
         </div>
+
         <div style={styles.copyright}>
-          <p>© {new Date().getFullYear()} Daily Well Fact. All rights reserved.</p>
+          {/* FIX: stable year */}
+          <p>© {currentYear} Daily Well Fact. All rights reserved.</p>
         </div>
       </footer>
 
       <style jsx>{`
-        /* Desktop navigation */
         .nav {
           display: flex;
           gap: 2rem;
         }
 
-        /* Mobile styles */
         @media (max-width: 768px) {
           .hamburger {
             display: flex !important;
@@ -106,33 +112,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             background: white;
             padding: 1rem 2rem;
             border-bottom: 1px solid #e5e7eb;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 99;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
           }
           .nav.nav-open {
             display: flex;
           }
         }
 
-        /* Hide hamburger on desktop */
         @media (min-width: 769px) {
           .hamburger {
             display: none !important;
           }
-          .nav {
-            display: flex !important;
-          }
         }
 
-        /* Hover effects */
         .nav a:hover {
           color: #10b981 !important;
-        }
-        .footer-link:hover {
-          color: #10b981 !important;
-        }
-        .hamburger:hover {
-          background-color: #f3f4f6;
         }
       `}</style>
     </div>
@@ -148,7 +142,7 @@ const styles = {
     fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
   },
   header: {
-    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    backgroundColor: 'rgba(255,255,255,0.98)',
     backdropFilter: 'blur(10px)',
     borderBottom: '1px solid rgba(0,0,0,0.05)',
     position: 'sticky' as const,
@@ -169,11 +163,8 @@ const styles = {
     fontWeight: 800,
     background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
     WebkitBackgroundClip: 'text',
-    backgroundClip: 'text',
     color: 'transparent',
     textDecoration: 'none',
-    letterSpacing: '-0.02em',
-    transition: 'opacity 0.2s',
   },
   hamburger: {
     display: 'flex',
@@ -184,9 +175,6 @@ const styles = {
     background: 'transparent',
     border: 'none',
     cursor: 'pointer',
-    padding: 0,
-    margin: 0,
-    zIndex: 100,
   },
   hamburgerLine: {
     width: '24px',
@@ -200,8 +188,6 @@ const styles = {
     textDecoration: 'none',
     fontSize: '1rem',
     fontWeight: 500,
-    transition: 'color 0.2s',
-    padding: '0.5rem 0',
   },
   main: {
     flex: 1,
@@ -233,25 +219,19 @@ const styles = {
     fontSize: '1.25rem',
     fontWeight: 700,
     color: 'white',
-    marginBottom: '0.25rem',
   },
   footerText: {
     fontSize: '0.85rem',
-    lineHeight: 1.5,
-    color: '#9ca3af',
   },
   footerHeading: {
     fontSize: '0.9rem',
     fontWeight: 600,
     color: 'white',
-    marginBottom: '0.5rem',
-    letterSpacing: '0.5px',
   },
   footerLink: {
     color: '#9ca3af',
     textDecoration: 'none',
     fontSize: '0.85rem',
-    transition: 'color 0.2s',
   },
   copyright: {
     maxWidth: 1280,
@@ -260,7 +240,6 @@ const styles = {
     fontSize: '0.75rem',
     borderTop: '1px solid #1f2937',
     paddingTop: '1rem',
-    color: '#6b7280',
   },
 };
 
