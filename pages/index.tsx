@@ -29,7 +29,7 @@ const Home: NextPage<Props> = ({ posts }) => {
     );
   }, [posts]);
 
-  // Get the latest post published on a Thursday (or fallback to latest overall)
+  // Get the latest post published on a Friday (or fallback to latest overall)
   const featuredPost = useMemo(() => {
     const thursdayPosts = sortedPosts.filter(post => {
       const date = new Date(post.publishedAt);
