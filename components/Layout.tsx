@@ -26,8 +26,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div style={{ ...styles.hamburgerLine, transform: isMenuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }} />
           </button>
 
-          {/* Desktop navigation */}
-          <nav style={{ ...styles.nav, ...(isMenuOpen ? styles.navMobileOpen : styles.navMobileClosed) }}>
+          {/* Navigation - class based for responsiveness */}
+          <nav className={`nav ${isMenuOpen ? 'nav-open' : ''}`}>
             <Link href="/"><a style={styles.navLink} onClick={closeMenu}>Home</a></Link>
             <Link href="/about"><a style={styles.navLink} onClick={closeMenu}>About</a></Link>
             <Link href="/contact"><a style={styles.navLink} onClick={closeMenu}>Contact</a></Link>
@@ -65,9 +65,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </footer>
 
       <style jsx>{`
+        /* Desktop styles */
+        .nav {
+          display: flex;
+          gap: 2rem;
+        }
+
+        /* Mobile styles */
         @media (max-width: 768px) {
-          .nav-mobile-open {
-            display: flex !important;
+          .nav {
+            display: none;
             flex-direction: column;
             position: absolute;
             top: 100%;
@@ -79,55 +86,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             z-index: 99;
           }
-          .nav-mobile-closed {
-            display: none !important;
-          }
-          .footer-content {
-            grid-template-columns: 1fr !important;
-            gap: 1.5rem !important;
-            text-align: center;
-          }
-          .footer-column {
-            align-items: center;
-          }
-          .footer-logo {
-            font-size: 1.25rem !important;
-          }
-          .footer-text {
-            font-size: 0.8rem !important;
+          .nav.nav-open {
+            display: flex;
           }
         }
+
         @media (min-width: 769px) {
-          .nav-mobile-open, .nav-mobile-closed {
+          .nav {
             display: flex !important;
           }
         }
-        .hamburger:hover {
-          background-color: #f3f4f6;
-        }
-        .nav-link:hover {
+
+        /* Hover effects */
+        .nav a:hover {
           color: #10b981 !important;
         }
         .footer-link:hover {
           color: #10b981 !important;
         }
-        .primary-button:hover {
-          background-color: #059669 !important;
-        }
-        .secondary-button:hover {
-          background-color: #10b981 !important;
-          color: white !important;
-        }
-        .card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .card-image:hover {
-          transform: scale(1.05);
-        }
-        .search-input:focus {
-          border-color: #10b981;
-          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        .hamburger:hover {
+          background-color: #f3f4f6;
         }
       `}</style>
     </div>
@@ -189,11 +167,6 @@ const styles = {
     backgroundColor: '#1f2937',
     borderRadius: '2px',
     transition: 'transform 0.3s, opacity 0.3s',
-  },
-  nav: {
-    display: 'flex',
-    gap: '2rem',
-    transition: 'all 0.3s ease',
   },
   navLink: {
     color: '#4b5563',
