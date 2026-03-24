@@ -93,7 +93,7 @@ const Home: NextPage<Props> = ({ posts }) => {
             <div style={styles.heroImage}>
               <div style={styles.heroImagePlaceholder}>
                 <img 
-                  src="/favicon.png" 
+                  src="/hero.png" 
                   alt="Hero Image" 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />
