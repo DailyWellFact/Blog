@@ -21,7 +21,7 @@ interface Props {
 
 const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   // Always use "Vijay Sharma" as the author (overwrite if not set)
-  const authorName = 'Vijay Sharma';
+  const authorName = post.author || 'Daily Well Fact';
 
   const components = {
     types: {
