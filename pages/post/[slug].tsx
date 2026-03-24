@@ -1,5 +1,6 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import { client, urlFor } from '../../lib/sanity';
 import { PortableText } from '@portabletext/react';
@@ -20,8 +21,16 @@ interface Props {
 }
 
 const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
-  // Always use "Vijay Sharma" as the author (overwrite if not set)
+  // Author name – fallback to "Daily Well Fact" if not set
   const authorName = post.author || 'Daily Well Fact';
+
+  // Client‑side share URL (to avoid window undefined on server)
+  const [shareUrl, setShareUrl] = useState('');
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, []);
+
+  const shareText = encodeURIComponent(`Check out "${post.title}" on Daily Well Fact`);
 
   const components = {
     types: {
@@ -53,235 +62,187 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
     },
   };
 
-  // Share URLs
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const shareText = encodeURIComponent(`Check out "${post.title}" on Daily Well Fact`);
-
   return (
     <Layout>
-      <article>
-        {/* Hero Section */}
-        <div style={styles.hero}>
-          <div style={styles.heroOverlay} />
-          {post.mainImage && (
-            <img
-              src={urlFor(post.mainImage).width(1200).url()}
-              alt={post.title}
-              style={styles.heroImage}
-            />
-          )}
-          <div style={styles.heroContent}>
-            <Link href="/">
-              <a style={styles.backLink}>← Back to all posts</a>
-            </Link>
-            <h1 style={styles.title}>{post.title}</h1>
-            <div style={styles.meta}>
-              <span>By {authorName}</span>
-              <span>•</span>
-              <span>
-                {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </span>
-            </div>
+      <article style={styles.container}>
+        <Link href="/">
+          <a style={styles.backLink}>← Back to all posts</a>
+        </Link>
+        <h1 style={styles.title}>{post.title}</h1>
+        <div style={styles.meta}>
+          By {authorName} •{' '}
+          {new Date(post.publishedAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </div>
+        {post.mainImage && (
+          <img
+            src={urlFor(post.mainImage).width(800).url()}
+            alt={post.title}
+            style={styles.featuredImage}
+          />
+        )}
+        <div style={styles.content}>
+          <PortableText value={post.body} components={components} />
+        </div>
+
+        {/* SHARE SECTION – from Page 2 */}
+        <div style={styles.shareSection}>
+          <p style={styles.shareText}>Share this article:</p>
+          <div style={styles.shareButtons}>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.shareButton}
+            >
+              Twitter
+            </a>
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.shareButton}
+            >
+              Facebook
+            </a>
+            <a
+              href={`https://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}&title=${encodeURIComponent(post.title)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.shareButton}
+            >
+              LinkedIn
+            </a>
           </div>
         </div>
 
-        {/* Post Content */}
-        <div style={styles.contentContainer}>
-          <div style={styles.content}>
-            <PortableText value={post.body} components={components} />
+        {/* AUTHOR BIO – from Page 2 */}
+        <div style={styles.authorBio}>
+          <div style={styles.authorAvatar}>
+            {/* Placeholder avatar – same as Page 2 */}
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="30" cy="30" r="30" fill="#10b981" />
+              <path d="M30 15 C35 15 39 19 39 24 C39 29 35 33 30 33 C25 33 21 29 21 24 C21 19 25 15 30 15 Z" fill="white" />
+              <circle cx="30" cy="38" r="12" fill="white" />
+            </svg>
           </div>
-
-          {/* Share Section */}
-          <div style={styles.shareSection}>
-            <p style={styles.shareText}>Share this article:</p>
-            <div style={styles.shareButtons}>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={styles.shareButton}
-              >
-                Twitter
-              </a>
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={styles.shareButton}
-              >
-                Facebook
-              </a>
-              <a
-                href={`https://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}&title=${encodeURIComponent(post.title)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={styles.shareButton}
-              >
-                LinkedIn
-              </a>
-            </div>
+          <div style={styles.authorInfo}>
+            <h4 style={styles.authorName}>{authorName}</h4>
+            <p style={styles.authorDesc}>
+              Health & wellness writer, founder of Daily Well Fact. Learn more{' '}
+              <Link href="/about">
+                <a style={styles.authorLink}>on the About page</a>
+              </Link>.
+            </p>
           </div>
+        </div>
 
-          {/* Author Bio – link to About page */}
-          <div style={styles.authorBio}>
-            <div style={styles.authorAvatar}>
-              {/* Placeholder avatar */}
-              <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="30" cy="30" r="30" fill="#10b981" />
-                <path d="M30 15 C35 15 39 19 39 24 C39 29 35 33 30 33 C25 33 21 29 21 24 C21 19 25 15 30 15 Z" fill="white" />
-                <circle cx="30" cy="38" r="12" fill="white" />
-              </svg>
-            </div>
-            <div style={styles.authorInfo}>
-              <h4 style={styles.authorName}>{authorName}</h4>
-              <p style={styles.authorDesc}>
-                Health & wellness writer, founder of Daily Well Fact. Learn more <Link href="/about"><a style={styles.authorLink}>on the About page</a></Link>.
-              </p>
-            </div>
-          </div>
-
-          {/* Related Posts */}
-          {relatedPosts.length > 0 && (
-            <section style={styles.relatedSection}>
-              <h2 style={styles.relatedTitle}>You Might Also Like</h2>
-              <div style={styles.relatedGrid}>
-                {relatedPosts.map((related) => (
-                  <div key={related._id} style={styles.relatedCard}>
-                    {related.mainImage && (
-                      <Link href={`/post/${related.slug.current}`}>
-                        <a style={styles.relatedImageLink}>
-                          <img
-                            src={urlFor(related.mainImage).width(400).url()}
-                            alt={related.title}
-                            style={styles.relatedImage}
-                          />
-                        </a>
-                      </Link>
-                    )}
-                    <div style={styles.relatedCardContent}>
-                      <Link href={`/post/${related.slug.current}`}>
-                        <a style={styles.relatedCardTitle}>{related.title}</a>
-                      </Link>
-                      <p style={styles.relatedCardMeta}>
-                        {new Date(related.publishedAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </p>
-                    </div>
+        {/* RELATED POSTS – from Page 1 (kept as is) */}
+        {relatedPosts.length > 0 && (
+          <section style={styles.relatedSection}>
+            <h2 style={styles.relatedTitle}>You Might Also Like</h2>
+            <div style={styles.relatedGrid}>
+              {relatedPosts.map((related) => (
+                <div key={related._id} style={styles.relatedCard}>
+                  {related.mainImage && (
+                    <Link href={`/post/${related.slug.current}`}>
+                      <a style={styles.relatedImageLink}>
+                        <img
+                          src={urlFor(related.mainImage).width(400).url()}
+                          alt={related.title}
+                          style={styles.relatedImage}
+                        />
+                      </a>
+                    </Link>
+                  )}
+                  <div style={styles.relatedCardContent}>
+                    <Link href={`/post/${related.slug.current}`}>
+                      <a style={styles.relatedCardTitle}>{related.title}</a>
+                    </Link>
+                    <p style={styles.relatedCardMeta}>
+                      {new Date(related.publishedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </p>
                   </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </article>
     </Layout>
   );
 };
 
+// Styles – mix of Page 1 (container, content, etc.) and new sections from Page 2
 const styles = {
-  hero: {
-    position: 'relative' as const,
-    height: '60vh',
-    minHeight: '400px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: '3rem',
-    overflow: 'hidden',
-  },
-  heroOverlay: {
-    position: 'absolute' as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7))',
-    zIndex: 1,
-  },
-  heroImage: {
-    position: 'absolute' as const,
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover' as const,
-  },
-  heroContent: {
-    position: 'relative' as const,
-    zIndex: 2,
-    textAlign: 'center' as const,
-    color: '#ffffff',
-    maxWidth: '800px',
-    padding: '0 2rem',
+  container: {
+    maxWidth: 800,
+    margin: '0 auto',
   },
   backLink: {
     display: 'inline-block',
-    marginBottom: '1rem',
-    color: '#ffffff',
+    marginBottom: '2rem',
+    color: '#10b981',
     textDecoration: 'none',
-    fontWeight: 500,
-    fontSize: '0.9rem',
-    opacity: 0.8,
-    transition: 'opacity 0.2s',
+    fontWeight: '500',
   },
   title: {
-    fontSize: '3rem',
-    fontWeight: 800,
-    marginBottom: '1rem',
-    lineHeight: 1.2,
-    letterSpacing: '-0.02em',
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: '0.5rem',
   },
   meta: {
-    fontSize: '0.9rem',
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '0.5rem',
-    opacity: 0.9,
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    marginBottom: '1.5rem',
   },
-  contentContainer: {
-    maxWidth: '800px',
-    margin: '0 auto',
-    padding: '0 2rem',
+  featuredImage: {
+    width: '100%',
+    height: 'auto',
+    borderRadius: '0.75rem',
+    marginBottom: '2rem',
   },
   content: {
     fontSize: '1.125rem',
     lineHeight: 1.7,
     color: '#1f2937',
-    marginBottom: '3rem',
+    marginBottom: '2rem',
   },
   blogImage: {
     width: '100%',
-    margin: '2rem 0',
-    borderRadius: '0.75rem',
+    margin: '1.5rem 0',
+    borderRadius: '0.5rem',
   },
   link: {
     color: '#10b981',
     textDecoration: 'underline',
   },
   paragraph: {
-    marginBottom: '1.5rem',
+    marginBottom: '1.25rem',
   },
   h2: {
     fontSize: '1.875rem',
-    fontWeight: 700,
-    marginTop: '2.5rem',
+    fontWeight: 'bold',
+    marginTop: '2rem',
     marginBottom: '1rem',
     color: '#111827',
   },
   h3: {
     fontSize: '1.5rem',
-    fontWeight: 600,
-    marginTop: '2rem',
+    fontWeight: 'bold',
+    marginTop: '1.5rem',
     marginBottom: '0.75rem',
     color: '#111827',
   },
+  // Share section (from Page 2, adjusted to match Page 1’s spacing)
   shareSection: {
     margin: '2rem 0',
     padding: '1.5rem 0',
@@ -309,6 +270,7 @@ const styles = {
     fontWeight: 500,
     transition: 'background 0.2s',
   },
+  // Author bio (from Page 2)
   authorBio: {
     display: 'flex',
     gap: '1rem',
@@ -338,26 +300,28 @@ const styles = {
     color: '#10b981',
     textDecoration: 'underline',
   },
+  // Related posts (from Page 1)
   relatedSection: {
-    marginTop: '3rem',
-    marginBottom: '2rem',
+    marginTop: '4rem',
+    paddingTop: '2rem',
+    borderTop: '1px solid #e5e7eb',
   },
   relatedTitle: {
     fontSize: '1.75rem',
-    fontWeight: 700,
+    fontWeight: 'bold',
     marginBottom: '1.5rem',
     color: '#1f2937',
   },
   relatedGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-    gap: '2rem',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+    gap: '1.5rem',
   },
   relatedCard: {
     backgroundColor: '#ffffff',
-    borderRadius: '1rem',
+    borderRadius: '0.75rem',
     overflow: 'hidden',
-    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
     transition: 'transform 0.2s, box-shadow 0.2s',
   },
   relatedImageLink: {
@@ -365,7 +329,7 @@ const styles = {
   },
   relatedImage: {
     width: '100%',
-    height: '180px',
+    height: '160px',
     objectFit: 'cover' as const,
   },
   relatedCardContent: {
@@ -373,7 +337,7 @@ const styles = {
   },
   relatedCardTitle: {
     fontSize: '1rem',
-    fontWeight: 600,
+    fontWeight: '600',
     color: '#111827',
     textDecoration: 'none',
     display: 'inline-block',
@@ -386,6 +350,7 @@ const styles = {
   },
 };
 
+// getStaticPaths and getStaticProps remain exactly as in Page 1
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = await client.fetch(
     `*[_type == "post" && defined(slug.current)]{ "slug": slug.current }`
@@ -397,6 +362,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
+  // Fetch the current post
   const query = `*[_type == "post" && slug.current == $slug][0]{
     _id,
     title,
@@ -408,6 +374,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }`;
   const post = await client.fetch(query, { slug: params?.slug });
 
+  // Fetch all posts for related suggestions
   const allPostsQuery = `*[_type == "post"]{
     _id,
     title,
@@ -418,6 +385,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }`;
   const allPosts = await client.fetch(allPostsQuery);
 
+  // Exclude current post and pick up to 3 random ones
   const otherPosts = allPosts.filter((p: Post) => p._id !== post?._id);
   const shuffled = otherPosts.sort(() => 0.5 - Math.random());
   const relatedPosts = shuffled.slice(0, 3);
