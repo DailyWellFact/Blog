@@ -33,7 +33,7 @@ const Home: NextPage<Props> = ({ posts }) => {
   const featuredPost = useMemo(() => {
     const thursdayPosts = sortedPosts.filter(post => {
       const date = new Date(post.publishedAt);
-      return date.getDay() === 4; // 4 = Thursday
+      return date.getDay() === 5; // 5 = Friday
     });
     if (thursdayPosts.length > 0) {
       return thursdayPosts[0];
