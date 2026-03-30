@@ -391,7 +391,10 @@ export async function getStaticProps() {
     }`
   );
 
-  return { props: { posts } };
+  return {
+    props: { posts },
+    revalidate: 60 * 60, // ✅ 1 hour (3600 seconds)
+  };
 }
 
 export default Home;
