@@ -1,5 +1,6 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useMemo, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { client, urlFor } from '../lib/sanity';
@@ -17,16 +18,14 @@ interface Props {
   posts: Post[];
 }
 
-// ✅ Deterministic date formatter (no hydration issues)
-const formatDate = (date: string) => {
-  return new Date(date).toISOString().split('T')[0];
-};
+// ✅ Hydration-safe date
+const formatDate = (date: string) =>
+  new Date(date).toISOString().split('T')[0];
 
 const Home: NextPage<Props> = ({ posts }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [visibleCount, setVisibleCount] = useState(10);
+  const [visibleCount, setVisibleCount] = useState(9);
 
-  // ✅ Sort posts (safe)
   const sortedPosts = useMemo(() => {
     return [...posts].sort(
       (a, b) =>
@@ -35,172 +34,164 @@ const Home: NextPage<Props> = ({ posts }) => {
     );
   }, [posts]);
 
-  // ✅ Featured post (safe)
   const featuredPost = useMemo(() => {
-    const fridayPosts = sortedPosts.filter((post) => {
-      return new Date(post.publishedAt).getDay() === 5;
-    });
-    return fridayPosts[0] || sortedPosts[0] || null;
+    return sortedPosts[0] || null;
   }, [sortedPosts]);
 
-  // ✅ Search filter
   const filteredPosts = useMemo(() => {
     if (!searchTerm.trim()) return sortedPosts;
-    const term = searchTerm.toLowerCase();
-    return sortedPosts.filter((post) =>
-      post.title.toLowerCase().includes(term)
+    return sortedPosts.filter((p) =>
+      p.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm, sortedPosts]);
 
-  // ✅ Grid posts
   const gridPosts = useMemo(() => {
-    if (searchTerm.trim()) return filteredPosts;
-    return filteredPosts.filter(
-      (post) => post._id !== featuredPost?._id
-    );
+    if (searchTerm) return filteredPosts;
+    return filteredPosts.filter((p) => p._id !== featuredPost?._id);
   }, [searchTerm, filteredPosts, featuredPost]);
 
-  // ✅ Correct hook usage
   useEffect(() => {
-    setVisibleCount(10);
+    setVisibleCount(9);
   }, [searchTerm]);
 
   const visiblePosts = gridPosts.slice(0, visibleCount);
   const hasMore = visibleCount < gridPosts.length;
 
-  const loadMore = () => setVisibleCount((prev) => prev + 10);
-
   return (
     <Layout>
       {/* HERO */}
       <section style={styles.hero}>
-        <div style={styles.heroContent}>
+        <div style={styles.heroText}>
           <h1 style={styles.heroTitle}>
-            Small Habits,<br />
+            Small Habits,
+            <br />
             <span style={styles.heroHighlight}>Big Wellness</span>
           </h1>
 
           <p style={styles.heroSubtitle}>
-            Science-backed wellness insights delivered daily.
+            Science-backed insights that shape a stronger, healthier future.
           </p>
 
           <div style={styles.heroButtons}>
-            <Link href="#latest" style={styles.primaryButton}>
+            <Link href="#latest" style={styles.primaryBtn}>
               Explore Articles
             </Link>
-
-            <Link href="/about" style={styles.secondaryButton}>
+            <Link href="/about" style={styles.secondaryBtn}>
               Learn More
             </Link>
           </div>
         </div>
 
-        <div style={styles.heroImage}>
-          <img
+        <div style={styles.heroImageWrap}>
+          <Image
             src="/hero.png"
-            alt="Hero"
-            style={styles.heroImageStyle}
+            alt="Wellness"
+            width={600}
+            height={400}
+            priority
+            style={styles.heroImage}
           />
         </div>
       </section>
 
       {/* FEATURED */}
       {!searchTerm && featuredPost && (
-        <section style={styles.featuredSection}>
-          <div style={styles.featuredContainer}>
-            <div style={styles.featuredContent}>
-              <span style={styles.featuredBadge}>
-                Featured Article
-              </span>
+        <section style={styles.featured}>
+          <div style={styles.featuredContent}>
+            <span style={styles.badge}>Featured</span>
 
-              <h2 style={styles.featuredTitle}>
-                {featuredPost.title}
-              </h2>
+            <h2 style={styles.featuredTitle}>
+              {featuredPost.title}
+            </h2>
 
-              <p style={styles.featuredMeta}>
-                By {featuredPost.author || 'Anonymous'} •{' '}
-                {formatDate(featuredPost.publishedAt)}
-              </p>
+            <p style={styles.meta}>
+              By {featuredPost.author || 'Anonymous'} •{' '}
+              {formatDate(featuredPost.publishedAt)}
+            </p>
 
-              <Link
-                href={`/post/${featuredPost.slug.current}`}
-                style={styles.featuredButton}
-              >
-                Read More →
-              </Link>
-            </div>
+            <Link
+              href={`/post/${featuredPost.slug.current}`}
+              style={styles.readBtn}
+            >
+              Read Article →
+            </Link>
+          </div>
 
-            {featuredPost.mainImage && (
-              <img
-                src={urlFor(featuredPost.mainImage).width(600).url()}
+          {featuredPost.mainImage && (
+            <div style={styles.featuredImageWrap}>
+              <Image
+                src={urlFor(featuredPost.mainImage)
+                  .width(800)
+                  .url()}
                 alt={featuredPost.title}
+                width={800}
+                height={500}
                 style={styles.featuredImage}
               />
-            )}
-          </div>
+            </div>
+          )}
         </section>
       )}
 
       {/* SEARCH */}
-      <div style={styles.searchSection}>
+      <div style={styles.searchWrap}>
         <input
           type="text"
           placeholder="Search articles..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={styles.searchInput}
+          style={styles.search}
         />
       </div>
 
       {/* GRID */}
       <section id="latest">
-        {visiblePosts.length === 0 ? (
-          <p style={styles.noResults}>
-            No results for "{searchTerm}"
-          </p>
-        ) : (
-          <>
-            <div style={styles.grid}>
-              {visiblePosts.map((post) => (
-                <Link
-                  key={post._id}
-                  href={`/post/${post.slug.current}`}
-                  style={styles.cardLink}
-                >
-                  <article style={styles.card}>
-                    {post.mainImage && (
-                      <img
-                        src={urlFor(post.mainImage).width(600).url()}
-                        alt={post.title}
-                        style={styles.cardImage}
-                      />
-                    )}
+        <div style={styles.grid}>
+          {visiblePosts.map((post) => (
+            <Link
+              key={post._id}
+              href={`/post/${post.slug.current}`}
+              style={styles.cardLink}
+            >
+              <article style={styles.card}>
+                {post.mainImage && (
+                  <Image
+                    src={urlFor(post.mainImage)
+                      .width(600)
+                      .url()}
+                    alt={post.title}
+                    width={600}
+                    height={400}
+                    sizes="(max-width:768px) 100vw, 33vw"
+                    style={styles.cardImage}
+                  />
+                )}
 
-                    <div style={styles.cardContent}>
-                      <h3 style={styles.cardTitle}>
-                        {post.title}
-                      </h3>
+                <div style={styles.cardBody}>
+                  <h3 style={styles.cardTitle}>
+                    {post.title}
+                  </h3>
 
-                      <p style={styles.cardMeta}>
-                        {formatDate(post.publishedAt)}
-                      </p>
-                    </div>
-                  </article>
-                </Link>
-              ))}
-            </div>
+                  <p style={styles.cardMeta}>
+                    {formatDate(post.publishedAt)}
+                  </p>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
 
-            {hasMore && (
-              <div style={styles.loadMoreWrap}>
-                <button
-                  onClick={loadMore}
-                  style={styles.loadMoreButton}
-                >
-                  Load More
-                </button>
-              </div>
-            )}
-          </>
+        {hasMore && (
+          <div style={styles.loadWrap}>
+            <button
+              onClick={() =>
+                setVisibleCount((v) => v + 9)
+              }
+              style={styles.loadBtn}
+            >
+              Load More
+            </button>
+          </div>
         )}
       </section>
     </Layout>
@@ -211,66 +202,88 @@ const styles = {
   hero: {
     display: 'flex',
     flexWrap: 'wrap' as const,
+    alignItems: 'center',
+    gap: '3rem',
+    marginBottom: '4rem',
+  },
+  heroText: { flex: 1, minWidth: 280 },
+  heroTitle: {
+    fontSize: '3rem',
+    fontWeight: 800,
+    lineHeight: 1.2,
+  },
+  heroHighlight: { color: '#10b981' },
+  heroSubtitle: {
+    marginTop: '1rem',
+    color: '#6b7280',
+    fontSize: '1.2rem',
+  },
+  heroButtons: { marginTop: '1.5rem', display: 'flex', gap: '1rem' },
+  primaryBtn: {
+    background: '#10b981',
+    color: '#fff',
+    padding: '0.7rem 1.4rem',
+    borderRadius: '0.5rem',
+    textDecoration: 'none',
+  },
+  secondaryBtn: {
+    border: '1px solid #10b981',
+    padding: '0.7rem 1.4rem',
+    borderRadius: '0.5rem',
+    textDecoration: 'none',
+    color: '#10b981',
+  },
+  heroImageWrap: { flex: 1, minWidth: 280 },
+  heroImage: { width: '100%', borderRadius: '1rem' },
+
+  featured: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
     gap: '2rem',
+    background: '#f3f4f6',
+    padding: '2rem',
+    borderRadius: '1rem',
     marginBottom: '3rem',
   },
-  heroContent: { flex: 1, minWidth: 280 },
-  heroTitle: { fontSize: '2.5rem', fontWeight: 'bold' },
-  heroHighlight: { color: '#10b981' },
-  heroSubtitle: { marginTop: '1rem', color: '#6b7280' },
-  heroButtons: { marginTop: '1.5rem', display: 'flex', gap: '1rem' },
-  primaryButton: {
+  featuredContent: { flex: 1, minWidth: 280 },
+  badge: {
     background: '#10b981',
     color: '#fff',
-    padding: '0.6rem 1.2rem',
-    borderRadius: '0.5rem',
-    textDecoration: 'none',
-  },
-  secondaryButton: {
-    border: '1px solid #10b981',
-    padding: '0.6rem 1.2rem',
-    borderRadius: '0.5rem',
-    textDecoration: 'none',
-  },
-  heroImage: { flex: 1 },
-  heroImageStyle: { width: '100%', borderRadius: '1rem' },
-
-  featuredSection: { marginBottom: '3rem' },
-  featuredContainer: {
-    display: 'flex',
-    gap: '2rem',
-    flexWrap: 'wrap' as const,
-  },
-  featuredContent: { flex: 1 },
-  featuredBadge: {
-    background: '#10b981',
-    color: '#fff',
-    padding: '0.2rem 0.6rem',
+    padding: '0.2rem 0.7rem',
     borderRadius: '1rem',
     fontSize: '0.75rem',
   },
-  featuredTitle: { fontSize: '1.8rem', marginTop: '0.5rem' },
-  featuredMeta: { fontSize: '0.85rem', color: '#6b7280' },
-  featuredButton: {
-    display: 'inline-block',
+  featuredTitle: {
+    fontSize: '2rem',
+    marginTop: '0.5rem',
+    fontWeight: 700,
+  },
+  meta: { color: '#6b7280', marginTop: '0.5rem' },
+  readBtn: {
     marginTop: '1rem',
+    display: 'inline-block',
     color: '#10b981',
     textDecoration: 'none',
   },
-  featuredImage: { width: 400, borderRadius: '0.5rem' },
+  featuredImageWrap: { flex: 1, minWidth: 280 },
+  featuredImage: {
+    width: '100%',
+    borderRadius: '0.5rem',
+  },
 
-  searchSection: { marginBottom: '2rem' },
-  searchInput: {
+  searchWrap: { textAlign: 'center' as const, marginBottom: '2rem' },
+  search: {
     width: '100%',
     maxWidth: 400,
-    padding: '0.6rem 1rem',
+    padding: '0.7rem 1rem',
     borderRadius: '2rem',
     border: '1px solid #ddd',
   },
 
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(250px,1fr))',
+    gridTemplateColumns:
+      'repeat(auto-fill, minmax(260px,1fr))',
     gap: '2rem',
   },
   cardLink: { textDecoration: 'none', color: 'inherit' },
@@ -278,23 +291,25 @@ const styles = {
     background: '#fff',
     borderRadius: '1rem',
     overflow: 'hidden',
-    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
   },
-  cardImage: { width: '100%', height: 180, objectFit: 'cover' as const },
-  cardContent: { padding: '1rem' },
-  cardTitle: { fontSize: '1.1rem' },
+  cardImage: {
+    width: '100%',
+    height: '180px',
+    objectFit: 'cover' as const,
+  },
+  cardBody: { padding: '1rem' },
+  cardTitle: { fontSize: '1.1rem', fontWeight: 600 },
   cardMeta: { fontSize: '0.8rem', color: '#6b7280' },
 
-  loadMoreWrap: { textAlign: 'center' as const, marginTop: '2rem' },
-  loadMoreButton: {
-    padding: '0.6rem 1.5rem',
-    borderRadius: '2rem',
+  loadWrap: { textAlign: 'center' as const, marginTop: '2rem' },
+  loadBtn: {
     background: '#10b981',
     color: '#fff',
     border: 'none',
+    padding: '0.7rem 2rem',
+    borderRadius: '2rem',
   },
-
-  noResults: { textAlign: 'center' as const },
 };
 
 export async function getStaticProps() {
