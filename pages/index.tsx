@@ -19,7 +19,6 @@ interface Props {
   posts: Post[];
 }
 
-// ✅ hydration-safe date
 const formatDate = (date: string) =>
   new Date(date).toISOString().split('T')[0];
 
@@ -88,6 +87,7 @@ const Home: NextPage<Props> = ({ posts }) => {
             width={600}
             height={400}
             priority
+            sizes="(max-width: 768px) 100vw, 50vw"
             style={styles.heroImage}
           />
         </div>
@@ -121,9 +121,13 @@ const Home: NextPage<Props> = ({ posts }) => {
               <Image
                 src={urlFor(featuredPost.mainImage)
                   .width(800)
+                  .quality(70)
+                  .auto('format')
                   .url()}
                 alt={featuredPost.title}
                 fill
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
                 style={styles.featuredImage}
               />
             </div>
@@ -156,7 +160,9 @@ const Home: NextPage<Props> = ({ posts }) => {
                   <div style={styles.cardImageWrapper}>
                     <Image
                       src={urlFor(post.mainImage)
-                        .width(600)
+                        .width(400)
+                        .quality(70)
+                        .auto('format')
                         .url()}
                       alt={post.title}
                       fill
@@ -194,7 +200,7 @@ const Home: NextPage<Props> = ({ posts }) => {
         )}
       </section>
 
-      {/* HOVER EFFECT */}
+      {/* HOVER */}
       <style jsx>{`
         article[data-card]:hover {
           transform: translateY(-6px);
@@ -208,10 +214,6 @@ const Home: NextPage<Props> = ({ posts }) => {
     </Layout>
   );
 };
-
-//
-// 🔧 STYLES (TYPE SAFE)
-//
 
 const styles: { [key: string]: CSSProperties } = {
   hero: {
@@ -393,7 +395,7 @@ export async function getStaticProps() {
 
   return {
     props: { posts },
-    revalidate: 60 * 60, // ✅ 1 hour (3600 seconds)
+    revalidate: 60 * 60,
   };
 }
 
