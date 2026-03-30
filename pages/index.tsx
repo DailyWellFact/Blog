@@ -1,6 +1,6 @@
 import type { NextPage } from 'next';
 import Link from 'next/link';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { client, urlFor } from '../lib/sanity';
 
@@ -8,7 +8,7 @@ interface Post {
   _id: string;
   title: string;
   slug: { current: string };
-  mainImage: any;
+  mainImage?: any;
   author?: string;
   publishedAt: string;
 }
@@ -17,278 +17,192 @@ interface Props {
   posts: Post[];
 }
 
+// ✅ Deterministic date formatter (no hydration issues)
+const formatDate = (date: string) => {
+  return new Date(date).toISOString().split('T')[0];
+};
+
 const Home: NextPage<Props> = ({ posts }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [visibleCount, setVisibleCount] = useState(10);
 
-  // Sort posts by date (newest first)
+  // ✅ Sort posts (safe)
   const sortedPosts = useMemo(() => {
     return [...posts].sort(
-      (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+      (a, b) =>
+        new Date(b.publishedAt).getTime() -
+        new Date(a.publishedAt).getTime()
     );
   }, [posts]);
 
-  // Get the latest post published on a Friday (or fallback to latest overall)
+  // ✅ Featured post (safe)
   const featuredPost = useMemo(() => {
-    const thursdayPosts = sortedPosts.filter(post => {
-      const date = new Date(post.publishedAt);
-      return date.getDay() === 5; // 5 = Friday
+    const fridayPosts = sortedPosts.filter((post) => {
+      return new Date(post.publishedAt).getDay() === 5;
     });
-    if (thursdayPosts.length > 0) {
-      return thursdayPosts[0];
-    }
-    return sortedPosts[0] || null;
+    return fridayPosts[0] || sortedPosts[0] || null;
   }, [sortedPosts]);
 
-  // Filter posts based on search term
+  // ✅ Search filter
   const filteredPosts = useMemo(() => {
     if (!searchTerm.trim()) return sortedPosts;
     const term = searchTerm.toLowerCase();
-    return sortedPosts.filter(post => post.title.toLowerCase().includes(term));
+    return sortedPosts.filter((post) =>
+      post.title.toLowerCase().includes(term)
+    );
   }, [searchTerm, sortedPosts]);
 
-  // For the main grid: when searching, we use all filteredPosts; otherwise we exclude the featuredPost
+  // ✅ Grid posts
   const gridPosts = useMemo(() => {
     if (searchTerm.trim()) return filteredPosts;
-    return filteredPosts.filter(post => post._id !== featuredPost?._id);
+    return filteredPosts.filter(
+      (post) => post._id !== featuredPost?._id
+    );
   }, [searchTerm, filteredPosts, featuredPost]);
 
-  // Reset visible count when search changes
-  useMemo(() => {
+  // ✅ Correct hook usage
+  useEffect(() => {
     setVisibleCount(10);
   }, [searchTerm]);
 
-  // Paginate the grid posts
   const visiblePosts = gridPosts.slice(0, visibleCount);
   const hasMore = visibleCount < gridPosts.length;
 
-  const loadMore = () => {
-    setVisibleCount(prev => prev + 10);
-  };
+  const loadMore = () => setVisibleCount((prev) => prev + 10);
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="hero" style={styles.hero}>
+      {/* HERO */}
+      <section style={styles.hero}>
         <div style={styles.heroContent}>
-          <h1 className="hero-title" style={styles.heroTitle}>
+          <h1 style={styles.heroTitle}>
             Small Habits,<br />
             <span style={styles.heroHighlight}>Big Wellness</span>
           </h1>
-          <p className="hero-subtitle" style={styles.heroSubtitle}>
-            Science-backed wellness insights delivered daily. Start your journey to a healthier you.
+
+          <p style={styles.heroSubtitle}>
+            Science-backed wellness insights delivered daily.
           </p>
+
           <div style={styles.heroButtons}>
-            <Link href="#latest">
-              <a className="primary-button" style={styles.primaryButton}>Explore Articles</a>
+            <Link href="#latest" style={styles.primaryButton}>
+              Explore Articles
             </Link>
-            <Link href="/about">
-              <a className="secondary-button" style={styles.secondaryButton}>Learn More</a>
+
+            <Link href="/about" style={styles.secondaryButton}>
+              Learn More
             </Link>
           </div>
         </div>
+
         <div style={styles.heroImage}>
-          <div style={styles.heroImagePlaceholder}>
-            <img 
-              src="/hero.png" 
-              alt="Hero Image" 
-              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '1rem' }} 
-            />
-          </div>
+          <img
+            src="/hero.png"
+            alt="Hero"
+            style={styles.heroImageStyle}
+          />
         </div>
       </section>
 
-      {/* Featured Post – only shown when no search term */}
+      {/* FEATURED */}
       {!searchTerm && featuredPost && (
         <section style={styles.featuredSection}>
           <div style={styles.featuredContainer}>
             <div style={styles.featuredContent}>
-              <span style={styles.featuredBadge}>Featured Article</span>
-              <h2 className="featured-title" style={styles.featuredTitle}>{featuredPost.title}</h2>
+              <span style={styles.featuredBadge}>
+                Featured Article
+              </span>
+
+              <h2 style={styles.featuredTitle}>
+                {featuredPost.title}
+              </h2>
+
               <p style={styles.featuredMeta}>
                 By {featuredPost.author || 'Anonymous'} •{' '}
-                {new Date(featuredPost.publishedAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {formatDate(featuredPost.publishedAt)}
               </p>
-              <Link href={`/post/${featuredPost.slug.current}`}>
-                <a style={styles.featuredButton}>Read More →</a>
+
+              <Link
+                href={`/post/${featuredPost.slug.current}`}
+                style={styles.featuredButton}
+              >
+                Read More →
               </Link>
             </div>
+
             {featuredPost.mainImage && (
-              <div style={styles.featuredImage}>
-                <img
-                  src={urlFor(featuredPost.mainImage).width(600).url()}
-                  alt={featuredPost.title}
-                  style={styles.featuredImageStyle}
-                />
-              </div>
+              <img
+                src={urlFor(featuredPost.mainImage).width(600).url()}
+                alt={featuredPost.title}
+                style={styles.featuredImage}
+              />
             )}
           </div>
         </section>
       )}
 
-      {/* Search Bar */}
+      {/* SEARCH */}
       <div style={styles.searchSection}>
-        <div style={styles.searchContainer}>
-          <svg
-            style={styles.searchIcon}
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search articles..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-            style={styles.searchInput}
-          />
-          {searchTerm && (
-            <button onClick={() => setSearchTerm('')} style={styles.clearButton}>
-              ✕
-            </button>
-          )}
-        </div>
+        <input
+          type="text"
+          placeholder="Search articles..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={styles.searchInput}
+        />
       </div>
 
-      {/* All Posts Grid */}
-      <section id="latest" style={styles.latestSection}>
-        <div style={styles.sectionHeader}>
-          <h2 className="section-title" style={styles.sectionTitle}>
-            {searchTerm ? 'Search Results' : 'All Articles'}
-          </h2>
-          {!searchTerm && (
-            <p className="section-subtitle" style={styles.sectionSubtitle}>Explore our complete collection of wellness insights</p>
-          )}
-        </div>
+      {/* GRID */}
+      <section id="latest">
         {visiblePosts.length === 0 ? (
-          <div style={styles.noResults}>
-            <p>No articles found matching "{searchTerm}".</p>
-          </div>
+          <p style={styles.noResults}>
+            No results for "{searchTerm}"
+          </p>
         ) : (
           <>
             <div style={styles.grid}>
               {visiblePosts.map((post) => (
-                <Link key={post._id} href={`/post/${post.slug.current}`}>
-                  <a style={styles.cardLink}>
-                    <article style={styles.card}>
-                      {post.mainImage && (
-                        <img
-                          src={urlFor(post.mainImage).width(600).url()}
-                          alt={post.title}
-                          className="card-image"
-                          style={styles.cardImage}
-                        />
-                      )}
-                      <div style={styles.cardContent}>
-                        <h3 style={styles.cardTitle}>{post.title}</h3>
-                        <p style={styles.cardMeta}>
-                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </p>
-                      </div>
-                    </article>
-                  </a>
+                <Link
+                  key={post._id}
+                  href={`/post/${post.slug.current}`}
+                  style={styles.cardLink}
+                >
+                  <article style={styles.card}>
+                    {post.mainImage && (
+                      <img
+                        src={urlFor(post.mainImage).width(600).url()}
+                        alt={post.title}
+                        style={styles.cardImage}
+                      />
+                    )}
+
+                    <div style={styles.cardContent}>
+                      <h3 style={styles.cardTitle}>
+                        {post.title}
+                      </h3>
+
+                      <p style={styles.cardMeta}>
+                        {formatDate(post.publishedAt)}
+                      </p>
+                    </div>
+                  </article>
                 </Link>
               ))}
             </div>
+
             {hasMore && (
-              <div style={styles.loadMoreContainer}>
-                <button onClick={loadMore} style={styles.loadMoreButton}>
+              <div style={styles.loadMoreWrap}>
+                <button
+                  onClick={loadMore}
+                  style={styles.loadMoreButton}
+                >
                   Load More
                 </button>
               </div>
             )}
-            {!hasMore && visiblePosts.length > 0 && (
-              <p style={styles.endMessage}>You've reached the end 🎉</p>
-            )}
           </>
         )}
       </section>
-
-      <style jsx>{`
-        /* Global hover effect */
-        article:hover {
-          transform: translateY(-5px);
-        }
-
-        /* Featured section responsive */
-        @media (max-width: 768px) {
-          .featured-container {
-            flex-direction: column !important;
-            text-align: center;
-            padding: 1.5rem !important;
-          }
-          .featured-content {
-            min-width: auto !important;
-            width: 100%;
-          }
-          .featured-image {
-            min-width: auto !important;
-            max-width: 100% !important;
-          }
-          .featured-title {
-            font-size: 1.5rem !important;
-          }
-          .featured-badge {
-            font-size: 0.7rem !important;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .hero-title {
-            font-size: 2rem !important;
-          }
-          .hero-subtitle {
-            font-size: 1rem !important;
-          }
-          .section-title {
-            font-size: 1.75rem !important;
-          }
-          .section-subtitle {
-            font-size: 1rem !important;
-          }
-          .card-image {
-            height: 160px !important;
-          }
-          .primary-button,
-          .secondary-button {
-            padding: 0.5rem 1rem !important;
-            font-size: 0.875rem !important;
-          }
-          .search-input {
-            font-size: 0.875rem !important;
-            padding: 0.5rem 1rem 0.5rem 2rem !important;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .hero-title {
-            font-size: 1.75rem !important;
-          }
-          .section-title {
-            font-size: 1.5rem !important;
-          }
-          .card-image {
-            height: 140px !important;
-          }
-        }
-      `}</style>
     </Layout>
   );
 };
@@ -297,264 +211,90 @@ const styles = {
   hero: {
     display: 'flex',
     flexWrap: 'wrap' as const,
-    alignItems: 'center',
-    justifyContent: 'space-between',
     gap: '2rem',
-    marginBottom: '4rem',
-    padding: '2rem 0',
+    marginBottom: '3rem',
   },
-  heroContent: {
-    flex: 1,
-    minWidth: '280px',
-  },
-  heroTitle: {
-    fontSize: '3rem',
-    fontWeight: 'bold',
-    lineHeight: 1.2,
-    marginBottom: '1rem',
-    color: '#1f2937',
-  },
-  heroHighlight: {
-    color: '#10b981',
-  },
-  heroSubtitle: {
-    fontSize: '1.25rem',
-    color: '#4b5563',
-    marginBottom: '2rem',
-    maxWidth: '500px',
-  },
-  heroButtons: {
-    display: 'flex',
-    gap: '1rem',
-    flexWrap: 'wrap' as const,
-  },
+  heroContent: { flex: 1, minWidth: 280 },
+  heroTitle: { fontSize: '2.5rem', fontWeight: 'bold' },
+  heroHighlight: { color: '#10b981' },
+  heroSubtitle: { marginTop: '1rem', color: '#6b7280' },
+  heroButtons: { marginTop: '1.5rem', display: 'flex', gap: '1rem' },
   primaryButton: {
-    backgroundColor: '#10b981',
-    color: '#ffffff',
-    padding: '0.75rem 1.5rem',
+    background: '#10b981',
+    color: '#fff',
+    padding: '0.6rem 1.2rem',
     borderRadius: '0.5rem',
     textDecoration: 'none',
-    fontWeight: '500',
-    transition: 'background-color 0.2s',
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
-    color: '#10b981',
-    padding: '0.75rem 1.5rem',
+    border: '1px solid #10b981',
+    padding: '0.6rem 1.2rem',
     borderRadius: '0.5rem',
     textDecoration: 'none',
-    fontWeight: '500',
-    border: '1px solid #10b981',
-    transition: 'background-color 0.2s, color 0.2s',
   },
-  heroImage: {
-    flex: 1,
-    minWidth: '280px',
-    maxWidth: '400px',
-  },
-  heroImagePlaceholder: {
-    width: '100%',
-    height: 'auto',
-    borderRadius: '1rem',
-    overflow: 'hidden',
-    border: '4px solid #22c55e',
-  },
-  featuredSection: {
-    marginBottom: '4rem',
-    backgroundColor: '#f3f4f6',
-    borderRadius: '1rem',
-    overflow: 'hidden',
-  },
+  heroImage: { flex: 1 },
+  heroImageStyle: { width: '100%', borderRadius: '1rem' },
+
+  featuredSection: { marginBottom: '3rem' },
   featuredContainer: {
     display: 'flex',
-    flexWrap: 'wrap' as const,
-    alignItems: 'center',
     gap: '2rem',
-    padding: '2rem',
+    flexWrap: 'wrap' as const,
   },
-  featuredContent: {
-    flex: 1,
-    minWidth: '280px',
-  },
+  featuredContent: { flex: 1 },
   featuredBadge: {
-    display: 'inline-block',
-    backgroundColor: '#10b981',
-    color: '#ffffff',
-    fontSize: '0.75rem',
-    fontWeight: '600',
-    padding: '0.25rem 0.75rem',
+    background: '#10b981',
+    color: '#fff',
+    padding: '0.2rem 0.6rem',
     borderRadius: '1rem',
-    marginBottom: '1rem',
+    fontSize: '0.75rem',
   },
-  featuredTitle: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    marginBottom: '0.5rem',
-    color: '#1f2937',
-  },
-  featuredMeta: {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-    marginBottom: '1rem',
-  },
+  featuredTitle: { fontSize: '1.8rem', marginTop: '0.5rem' },
+  featuredMeta: { fontSize: '0.85rem', color: '#6b7280' },
   featuredButton: {
+    display: 'inline-block',
+    marginTop: '1rem',
     color: '#10b981',
     textDecoration: 'none',
-    fontWeight: '500',
-    display: 'inline-block',
-    marginTop: '0.5rem',
   },
-  featuredImage: {
-    flex: 1,
-    minWidth: '280px',
-    maxWidth: '400px',
-  },
-  featuredImageStyle: {
-    width: '100%',
-    height: 'auto',
-    borderRadius: '0.5rem',
-    objectFit: 'cover' as const,
-  },
-  searchSection: {
-    marginBottom: '3rem',
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  searchContainer: {
-    position: 'relative' as const,
-    width: '100%',
-    maxWidth: '500px',
-  },
-  searchIcon: {
-    position: 'absolute' as const,
-    left: '1rem',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    width: 20,
-    height: 20,
-    color: '#9ca3af',
-    pointerEvents: 'none' as const,
-  },
+  featuredImage: { width: 400, borderRadius: '0.5rem' },
+
+  searchSection: { marginBottom: '2rem' },
   searchInput: {
     width: '100%',
-    padding: '0.75rem 1rem 0.75rem 2.5rem',
-    fontSize: '1rem',
-    border: '1px solid #e5e7eb',
+    maxWidth: 400,
+    padding: '0.6rem 1rem',
     borderRadius: '2rem',
-    outline: 'none',
-    transition: 'border-color 0.2s, box-shadow 0.2s',
-    fontFamily: 'inherit',
-    backgroundColor: '#ffffff',
+    border: '1px solid #ddd',
   },
-  clearButton: {
-    position: 'absolute' as const,
-    right: '1rem',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    color: '#9ca3af',
-    padding: '0.25rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '50%',
-    transition: 'background 0.2s',
-  },
-  latestSection: {
-    marginBottom: '4rem',
-  },
-  sectionHeader: {
-    textAlign: 'center' as const,
-    marginBottom: '2rem',
-  },
-  sectionTitle: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: '0.5rem',
-  },
-  sectionSubtitle: {
-    fontSize: '1.125rem',
-    color: '#6b7280',
-  },
+
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(250px,1fr))',
     gap: '2rem',
   },
-  cardLink: {
-    display: 'block',
-    height: '100%',
-    textDecoration: 'none',
-    color: 'inherit',
-  },
+  cardLink: { textDecoration: 'none', color: 'inherit' },
   card: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    height: '100%',
-    backgroundColor: '#ffffff',
+    background: '#fff',
     borderRadius: '1rem',
     overflow: 'hidden',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    transition: 'transform 0.2s, box-shadow 0.2s',
-    cursor: 'pointer',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
   },
-  cardImage: {
-    width: '100%',
-    height: 200,
-    flexShrink: 0,
-    objectFit: 'cover' as const,
-    transition: 'transform 0.3s',
-  },
-  cardContent: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    justifyContent: 'space-between' as const,
-    padding: '1.5rem',
-  },
-  cardTitle: {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-    color: '#111827',
-    textDecoration: 'none',
-    marginBottom: '0.5rem',
-    transition: 'color 0.2s',
-  },
-  cardMeta: {
-    fontSize: '0.875rem',
-    color: '#6b7280',
-  },
-  noResults: {
-    textAlign: 'center' as const,
-    padding: '3rem',
-    color: '#6b7280',
-    fontSize: '1.125rem',
-  },
-  loadMoreContainer: {
-    textAlign: 'center' as const,
-    marginTop: '2rem',
-  },
+  cardImage: { width: '100%', height: 180, objectFit: 'cover' as const },
+  cardContent: { padding: '1rem' },
+  cardTitle: { fontSize: '1.1rem' },
+  cardMeta: { fontSize: '0.8rem', color: '#6b7280' },
+
+  loadMoreWrap: { textAlign: 'center' as const, marginTop: '2rem' },
   loadMoreButton: {
-    backgroundColor: '#10b981',
-    color: '#ffffff',
-    padding: '0.75rem 2rem',
+    padding: '0.6rem 1.5rem',
     borderRadius: '2rem',
+    background: '#10b981',
+    color: '#fff',
     border: 'none',
-    fontSize: '1rem',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s',
   },
-  endMessage: {
-    textAlign: 'center' as const,
-    marginTop: '2rem',
-    color: '#6b7280',
-    fontSize: '0.875rem',
-  },
+
+  noResults: { textAlign: 'center' as const },
 };
 
 export async function getStaticProps() {
@@ -566,7 +306,9 @@ export async function getStaticProps() {
     author,
     publishedAt
   }`;
+
   const posts = await client.fetch(query);
+
   return { props: { posts } };
 }
 
