@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState, useMemo, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { client, urlFor } from '../lib/sanity';
+import type { CSSProperties } from 'react';
 
 interface Post {
   _id: string;
@@ -18,7 +19,7 @@ interface Props {
   posts: Post[];
 }
 
-// ✅ Hydration-safe date
+// ✅ hydration-safe date
 const formatDate = (date: string) =>
   new Date(date).toISOString().split('T')[0];
 
@@ -34,9 +35,7 @@ const Home: NextPage<Props> = ({ posts }) => {
     );
   }, [posts]);
 
-  const featuredPost = useMemo(() => {
-    return sortedPosts[0] || null;
-  }, [sortedPosts]);
+  const featuredPost = sortedPosts[0] || null;
 
   const filteredPosts = useMemo(() => {
     if (!searchTerm.trim()) return sortedPosts;
@@ -124,8 +123,7 @@ const Home: NextPage<Props> = ({ posts }) => {
                   .width(800)
                   .url()}
                 alt={featuredPost.title}
-                width={800}
-                height={500}
+                fill
                 style={styles.featuredImage}
               />
             </div>
@@ -155,16 +153,18 @@ const Home: NextPage<Props> = ({ posts }) => {
             >
               <article style={styles.card} data-card>
                 {post.mainImage && (
-  <div style={styles.cardImageWrapper}>
-    <Image
-      src={urlFor(post.mainImage).width(600).url()}
-      alt={post.title}
-      fill
-      sizes="(max-width:768px) 100vw, 33vw"
-      style={styles.cardImage}
-    />
-  </div>
-)}
+                  <div style={styles.cardImageWrapper}>
+                    <Image
+                      src={urlFor(post.mainImage)
+                        .width(600)
+                        .url()}
+                      alt={post.title}
+                      fill
+                      sizes="(max-width:768px) 100vw, 33vw"
+                      style={styles.cardImage}
+                    />
+                  </div>
+                )}
 
                 <div style={styles.cardBody}>
                   <h3 style={styles.cardTitle}>
@@ -175,12 +175,6 @@ const Home: NextPage<Props> = ({ posts }) => {
                     {formatDate(post.publishedAt)}
                   </p>
                 </div>
-                    <style jsx>{`
-  article[data-card]:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
-  }
-`}</style>
               </article>
             </Link>
           ))}
@@ -199,15 +193,30 @@ const Home: NextPage<Props> = ({ posts }) => {
           </div>
         )}
       </section>
-  
+
+      {/* HOVER EFFECT */}
+      <style jsx>{`
+        article[data-card]:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        article[data-card]:hover img {
+          transform: scale(1.05);
+        }
+      `}</style>
     </Layout>
   );
 };
 
-const styles = {
+//
+// 🔧 STYLES (TYPE SAFE)
+//
+
+const styles: { [key: string]: CSSProperties } = {
   hero: {
     display: 'flex',
-    flexWrap: 'wrap' as const,
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: '3rem',
     marginBottom: '4rem',
@@ -224,7 +233,11 @@ const styles = {
     color: '#6b7280',
     fontSize: '1.2rem',
   },
-  heroButtons: { marginTop: '1.5rem', display: 'flex', gap: '1rem' },
+  heroButtons: {
+    marginTop: '1.5rem',
+    display: 'flex',
+    gap: '1rem',
+  },
   primaryBtn: {
     background: '#10b981',
     color: '#fff',
@@ -244,7 +257,7 @@ const styles = {
 
   featured: {
     display: 'flex',
-    flexWrap: 'wrap' as const,
+    flexWrap: 'wrap',
     gap: '2rem',
     background: '#f3f4f6',
     padding: '2rem',
@@ -271,13 +284,22 @@ const styles = {
     color: '#10b981',
     textDecoration: 'none',
   },
-  featuredImageWrap: { flex: 1, minWidth: 280 },
-  featuredImage: {
-    width: '100%',
+  featuredImageWrap: {
+    position: 'relative',
+    flex: 1,
+    minWidth: 280,
+    height: 300,
     borderRadius: '0.5rem',
+    overflow: 'hidden',
+  },
+  featuredImage: {
+    objectFit: 'cover',
   },
 
-  searchWrap: { textAlign: 'center' as const, marginBottom: '2rem' },
+  searchWrap: {
+    textAlign: 'center',
+    marginBottom: '2rem',
+  },
   search: {
     width: '100%',
     maxWidth: 400,
@@ -286,78 +308,88 @@ const styles = {
     border: '1px solid #ddd',
   },
 
- grid: {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(260px,1fr))',
-  gap: '2rem',
-},
-  
-  cardLink: { textDecoration: 'none', color: 'inherit' },
-card: {
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%', // 🔥 equal height
-  background: '#fff',
-  borderRadius: '1rem',
-  overflow: 'hidden',
-  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-  cursor: 'pointer',
-},
+  grid: {
+    display: 'grid',
+    gridTemplateColumns:
+      'repeat(auto-fill, minmax(260px,1fr))',
+    gap: '2rem',
+  },
 
-cardImageWrapper: {
-  position: 'relative',
-  width: '100%',
-  height: 180,
-  flexShrink: 0,
-},
+  cardLink: {
+    textDecoration: 'none',
+    color: 'inherit',
+  },
 
-cardImage: {
-  objectFit: 'cover',
-},
+  card: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    background: '#fff',
+    borderRadius: '1rem',
+    overflow: 'hidden',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+    transition:
+      'transform 0.25s ease, box-shadow 0.25s ease',
+  },
 
-cardBody: {
-  padding: '1rem',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  flex: 1, // 🔥 equal height fix
-},
+  cardImageWrapper: {
+    position: 'relative',
+    width: '100%',
+    height: 180,
+    flexShrink: 0,
+  },
 
-cardTitle: {
-  fontSize: '1.1rem',
-  fontWeight: 600,
-  color: '#111827',
-  lineHeight: 1.4,
-},
+  cardImage: {
+    objectFit: 'cover',
+    transition: 'transform 0.4s ease',
+  },
 
-cardMeta: {
-  fontSize: '0.8rem',
-  color: '#6b7280',
-  marginTop: '0.5rem',
-},
+  cardBody: {
+    padding: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    flex: 1,
+  },
 
-  loadWrap: { textAlign: 'center' as const, marginTop: '2rem' },
+  cardTitle: {
+    fontSize: '1.1rem',
+    fontWeight: 600,
+    lineHeight: 1.4,
+  },
+
+  cardMeta: {
+    fontSize: '0.8rem',
+    color: '#6b7280',
+    marginTop: '0.5rem',
+  },
+
+  loadWrap: {
+    textAlign: 'center',
+    marginTop: '2rem',
+  },
+
   loadBtn: {
     background: '#10b981',
     color: '#fff',
     border: 'none',
     padding: '0.7rem 2rem',
     borderRadius: '2rem',
+    cursor: 'pointer',
   },
 };
 
 export async function getStaticProps() {
-  const query = `*[_type == "post"]{
-    _id,
-    title,
-    slug,
-    mainImage,
-    author,
-    publishedAt
-  }`;
-
-  const posts = await client.fetch(query);
+  const posts = await client.fetch(
+    `*[_type == "post"]{
+      _id,
+      title,
+      slug,
+      mainImage,
+      author,
+      publishedAt
+    }`
+  );
 
   return { props: { posts } };
 }
