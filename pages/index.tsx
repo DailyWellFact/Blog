@@ -153,19 +153,18 @@ const Home: NextPage<Props> = ({ posts }) => {
               href={`/post/${post.slug.current}`}
               style={styles.cardLink}
             >
-              <article style={styles.card}>
+              <article style={styles.card} data-card>
                 {post.mainImage && (
-                  <Image
-                    src={urlFor(post.mainImage)
-                      .width(600)
-                      .url()}
-                    alt={post.title}
-                    width={600}
-                    height={400}
-                    sizes="(max-width:768px) 100vw, 33vw"
-                    style={styles.cardImage}
-                  />
-                )}
+  <div style={styles.cardImageWrapper}>
+    <Image
+      src={urlFor(post.mainImage).width(600).url()}
+      alt={post.title}
+      fill
+      sizes="(max-width:768px) 100vw, 33vw"
+      style={styles.cardImage}
+    />
+  </div>
+)}
 
                 <div style={styles.cardBody}>
                   <h3 style={styles.cardTitle}>
@@ -194,6 +193,12 @@ const Home: NextPage<Props> = ({ posts }) => {
           </div>
         )}
       </section>
+      <style jsx>{`
+  article[data-card]:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+  }
+`}</style>
     </Layout>
   );
 };
@@ -280,27 +285,56 @@ const styles = {
     border: '1px solid #ddd',
   },
 
-  grid: {
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(auto-fill, minmax(260px,1fr))',
-    gap: '2rem',
-  },
+ grid: {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(260px,1fr))',
+  gap: '2rem',
+},
+  
   cardLink: { textDecoration: 'none', color: 'inherit' },
-  card: {
-    background: '#fff',
-    borderRadius: '1rem',
-    overflow: 'hidden',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-  },
-  cardImage: {
-    width: '100%',
-    height: '180px',
-    objectFit: 'cover' as const,
-  },
-  cardBody: { padding: '1rem' },
-  cardTitle: { fontSize: '1.1rem', fontWeight: 600 },
-  cardMeta: { fontSize: '0.8rem', color: '#6b7280' },
+card: {
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%', // 🔥 equal height
+  background: '#fff',
+  borderRadius: '1rem',
+  overflow: 'hidden',
+  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+  cursor: 'pointer',
+},
+
+cardImageWrapper: {
+  position: 'relative',
+  width: '100%',
+  height: 180,
+  flexShrink: 0,
+},
+
+cardImage: {
+  objectFit: 'cover',
+},
+
+cardBody: {
+  padding: '1rem',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  flex: 1, // 🔥 equal height fix
+},
+
+cardTitle: {
+  fontSize: '1.1rem',
+  fontWeight: 600,
+  color: '#111827',
+  lineHeight: 1.4,
+},
+
+cardMeta: {
+  fontSize: '0.8rem',
+  color: '#6b7280',
+  marginTop: '0.5rem',
+},
 
   loadWrap: { textAlign: 'center' as const, marginTop: '2rem' },
   loadBtn: {
