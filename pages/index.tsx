@@ -175,6 +175,12 @@ const Home: NextPage<Props> = ({ posts }) => {
                     {formatDate(post.publishedAt)}
                   </p>
                 </div>
+                    <style jsx>{`
+  article[data-card]:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+  }
+`}</style>
               </article>
             </Link>
           ))}
@@ -193,12 +199,7 @@ const Home: NextPage<Props> = ({ posts }) => {
           </div>
         )}
       </section>
-      <style jsx>{`
-  article[data-card]:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
-  }
-`}</style>
+  
     </Layout>
   );
 };
