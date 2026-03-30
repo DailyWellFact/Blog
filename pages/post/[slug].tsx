@@ -122,7 +122,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
             <div style={styles.grid}>
               {relatedPosts.map((item) => (
                 <Link href={`/post/${item.slug.current}`} key={item._id}>
-                  <div style={styles.card}>
+                  <div style={styles.card} data-card>
                     <div style={styles.imageWrapper}>
                       <Image
                         src={urlFor(item.mainImage).width(600).url()}
@@ -147,15 +147,12 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           </section>
         )}
 
-        <style jsx>{`
-          .overlay {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-          }
-          div:hover > .overlay {
-            opacity: 1;
-          }
-        `}</style>
+       <style jsx>{`
+  div[data-card]:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+  }
+`}</style>
       </article>
     </Layout>
   );
@@ -247,48 +244,49 @@ const styles: { [key: string]: CSSProperties } = {
     marginBottom: '1rem',
   },
 
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))',
-    gap: '1rem',
-  },
+grid: {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))',
+  gap: '1.5rem',
+},
 
-  card: {
-    borderRadius: '1rem',
-    overflow: 'hidden',
-    cursor: 'pointer',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-  },
+card: {
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  borderRadius: '1rem',
+  overflow: 'hidden',
+  cursor: 'pointer',
+  backgroundColor: '#ffffff',
+  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+},
 
-  imageWrapper: {
-    position: 'relative',
-    width: '100%',
-    height: 160,
-  },
+imageWrapper: {
+  position: 'relative',
+  width: '100%',
+  height: 160,
+  flexShrink: 0,
+},
 
-  cardImage: {
-    objectFit: 'cover',
-  },
+cardImage: {
+  objectFit: 'cover',
+},
 
-  overlay: {
-    position: 'absolute',
-    inset: 0,
-    background: 'rgba(0,0,0,0.4)',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: 600,
-  },
+cardContent: {
+  padding: '1rem',
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1, // 🔥 THIS MAKES ALL CARDS EQUAL HEIGHT
+  justifyContent: 'space-between',
+},
 
-  cardContent: {
-    padding: '1rem',
-  },
-
-  cardTitle: {
-    fontSize: '1rem',
-    fontWeight: 600,
-  },
+cardTitle: {
+  fontSize: '1rem',
+  fontWeight: 600,
+  color: '#111827',
+  lineHeight: 1.4,
+},
 };
 
 //
