@@ -8,14 +8,22 @@ const Disclaimer: NextPage = () => {
         <h1 style={styles.title}>Disclaimer</h1>
         <div style={styles.content}>
           <p style={styles.paragraph}>
-            The information provided on Daily Well Fact is for general informational and educational purposes only. It is not intended as a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider with any questions you may have regarding a medical condition.
+            The information provided on Daily Well Fact is for general informational and educational purposes only. All content published on this website is intended to share knowledge about health, wellness, nutrition, and lifestyle topics.
           </p>
           <p style={styles.paragraph}>
-            We strive to ensure the accuracy of our content by sourcing from reliable and trusted references. However, we make no warranties or representations about the completeness, accuracy, or reliability of the information. Any reliance you place on such information is strictly at your own risk.
+            The information on this website is not intended to replace professional medical advice, diagnosis, or treatment. Always seek the advice of a qualified healthcare professional regarding any medical condition or health concerns.
           </p>
           <p style={styles.paragraph}>
-            We are not liable for any loss or damage arising from the use of this website. If you find any mistake or have any concerns about our content, please contact us at{' '}
-            <a href="mailto:dailyhabitfact@gmail.com" style={styles.link}>dailyhabitfact@gmail.com</a>. We appreciate your feedback and will strive to correct any errors promptly.
+            While we strive to provide accurate and up-to-date information, Daily Well Fact makes no guarantees about the completeness, reliability, or accuracy of any information published on this website. Any action you take based on the information found on this website is strictly at your own risk.
+          </p>
+          <p style={styles.paragraph}>
+            Daily Well Fact may contain links to external websites or third-party resources for additional information. We do not control or guarantee the accuracy or reliability of content on external websites.
+          </p>
+          <p style={styles.paragraph}>
+            Some content on this website may be updated or modified over time to maintain accuracy and relevance.
+          </p>
+          <p style={styles.paragraph}>
+            By using this website, you acknowledge that you are responsible for how you use the information provided.
           </p>
         </div>
       </div>
@@ -42,7 +50,7 @@ const styles = {
     color: '#4b5563',
   },
   paragraph: {
-    marginBottom: '1.5rem',
+    marginBottom: '1.25rem',
   },
   link: {
     color: '#10b981',
