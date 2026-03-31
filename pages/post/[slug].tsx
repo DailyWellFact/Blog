@@ -82,6 +82,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               src={urlFor(post.mainImage).width(1200).url()}
               alt={post.title}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
               style={styles.featuredImage}
             />
           </div>
@@ -121,22 +122,20 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
             <div style={styles.grid}>
               {relatedPosts.map((item) => (
-                <Link href={`/post/${item.slug.current}`} key={item._id}>
-                  <div style={styles.card} data-card>
+                <Link href={`/post/${item.slug.current}`} key={item._id} style={styles.cardLink}>
+                  <div style={styles.card}>
                     <div style={styles.imageWrapper}>
                       <Image
                         src={urlFor(item.mainImage).width(600).url()}
                         alt={item.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 220px"
                         style={styles.cardImage}
                       />
-
-                      {/* 🔥 HOVER OVERLAY */}
                       <div className="overlay" style={styles.overlay}>
                         Read →
                       </div>
                     </div>
-
                     <div style={styles.cardContent}>
                       <h3 style={styles.cardTitle}>{item.title}</h3>
                     </div>
@@ -147,12 +146,12 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           </section>
         )}
 
-       <style jsx>{`
-  div[data-card]:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
-  }
-`}</style>
+        <style jsx>{`
+          div[data-card]:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+          }
+        `}</style>
       </article>
     </Layout>
   );
@@ -161,11 +160,15 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 export default PostPage;
 
 //
-// 🔧 STYLES (TYPE SAFE)
+// 🔧 STYLES (FIXED)
 //
 
 const styles: { [key: string]: CSSProperties } = {
-  container: { maxWidth: 800, margin: '0 auto' },
+  container: { 
+    maxWidth: 800, 
+    margin: '0 auto',
+    padding: '0 1rem', // Add padding for mobile
+  },
 
   backLink: {
     display: 'inline-block',
@@ -175,20 +178,22 @@ const styles: { [key: string]: CSSProperties } = {
   },
 
   title: {
-    fontSize: '2.5rem',
+    fontSize: '2rem', // Slightly smaller on mobile
     fontWeight: 700,
     marginBottom: '0.5rem',
+    wordBreak: 'break-word', // Prevent text overflow
   },
 
   meta: {
     color: '#6b7280',
     marginBottom: '1.5rem',
+    fontSize: '0.9rem',
   },
 
   featuredWrapper: {
     position: 'relative',
     width: '100%',
-    height: 400,
+    aspectRatio: '16 / 9', // Fixed aspect ratio
     borderRadius: '1rem',
     overflow: 'hidden',
     marginBottom: '2rem',
@@ -200,12 +205,13 @@ const styles: { [key: string]: CSSProperties } = {
 
   content: {
     lineHeight: 1.7,
+    wordBreak: 'break-word',
   },
 
   blogImageWrapper: {
     position: 'relative',
     width: '100%',
-    height: 400,
+    aspectRatio: '16 / 9', // Fixed aspect ratio for blog images
     margin: '2rem 0',
   },
 
@@ -226,6 +232,7 @@ const styles: { [key: string]: CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     gap: '1rem',
+    flexWrap: 'wrap', // Wrap on mobile
   },
 
   shareButton: {
@@ -233,6 +240,8 @@ const styles: { [key: string]: CSSProperties } = {
     padding: '0.5rem 1rem',
     borderRadius: '0.5rem',
     textDecoration: 'none',
+    color: '#374151',
+    transition: 'background 0.2s',
   },
 
   relatedSection: {
@@ -244,49 +253,74 @@ const styles: { [key: string]: CSSProperties } = {
     marginBottom: '1rem',
   },
 
-grid: {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))',
-  gap: '1.5rem',
-},
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', // Larger min width for better mobile layout
+    gap: '1.5rem',
+  },
 
-card: {
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  borderRadius: '1rem',
-  overflow: 'hidden',
-  cursor: 'pointer',
-  backgroundColor: '#ffffff',
-  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-  transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-},
+  cardLink: {
+    textDecoration: 'none',
+    display: 'block',
+  },
 
-imageWrapper: {
-  position: 'relative',
-  width: '100%',
-  height: 160,
-  flexShrink: 0,
-},
+  card: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    borderRadius: '1rem',
+    overflow: 'hidden',
+    cursor: 'pointer',
+    backgroundColor: '#ffffff',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+  },
 
-cardImage: {
-  objectFit: 'cover',
-},
+  imageWrapper: {
+    position: 'relative',
+    width: '100%',
+    aspectRatio: '16 / 9', // Fixed aspect ratio for card images
+    overflow: 'hidden',
+  },
 
-cardContent: {
-  padding: '1rem',
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1, // 🔥 THIS MAKES ALL CARDS EQUAL HEIGHT
-  justifyContent: 'space-between',
-},
+  cardImage: {
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease',
+  },
 
-cardTitle: {
-  fontSize: '1rem',
-  fontWeight: 600,
-  color: '#111827',
-  lineHeight: 1.4,
-},
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.7)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'white',
+    fontSize: '1rem',
+    fontWeight: 600,
+    opacity: 0,
+    transition: 'opacity 0.3s ease',
+    pointerEvents: 'none',
+  },
+
+  cardContent: {
+    padding: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+  },
+
+  cardTitle: {
+    fontSize: '1rem',
+    fontWeight: 600,
+    color: '#111827',
+    lineHeight: 1.4,
+    margin: 0,
+    wordBreak: 'break-word',
+  },
 };
 
 //
