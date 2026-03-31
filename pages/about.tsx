@@ -10,24 +10,42 @@ const About: NextPage = () => {
           <h1 style={styles.title}>About Daily Well Fact</h1>
           <div style={styles.content}>
             <p style={styles.paragraph}>
-              Daily Well Fact is a health and wellness blog dedicated to sharing simple, practical, and science-backed information that helps people live a healthier life. Our goal is to make reliable wellness knowledge easy to understand and useful for everyday life.
+              Welcome to Daily Well Fact, a website dedicated to sharing simple, practical, and reliable information about health and wellness. Our goal is to help readers understand everyday health topics in a clear and easy-to-follow way.
             </p>
             <p style={styles.paragraph}>
-              Founded in 2026, Daily Well Fact focuses on topics such as healthy habits, nutrition tips, lifestyle improvement, and general wellness advice. We believe that small and consistent habits can make a big difference in overall health and well-being.
+              At Daily Well Fact, we believe that good health comes from small daily habits. Through our articles, we share helpful information about nutrition, lifestyle habits, fitness, and general well-being so readers can make better choices for a healthier life.
             </p>
             <p style={styles.paragraph}>
-              Our mission is to provide clear, helpful, and trustworthy content that supports people in building better daily routines and improving their quality of life.
+              Our content focuses on providing easy-to-understand explanations about common health questions, daily health tips, and wellness guidance that anyone can apply in their everyday routine.
             </p>
+          </div>
+        </section>
+
+        {/* Mission Section */}
+        <section style={styles.section}>
+          <h2 style={styles.subtitle}>Our Mission</h2>
+          <div style={styles.content}>
             <p style={styles.paragraph}>
-              The website is managed by Vijay Sharma, who is passionate about health awareness and sharing simple tips that help people develop healthier habits.
+              Our mission is to provide clear, useful, and trustworthy health information that helps people build healthier lifestyles through simple daily habits and informed decisions.
             </p>
+          </div>
+        </section>
+
+        {/* Content Section */}
+        <section style={styles.section}>
+          <h2 style={styles.subtitle}>Our Content</h2>
+          <div style={styles.content}>
             <p style={styles.paragraph}>
-              All content published on Daily Well Fact is carefully researched from trusted and authoritative sources to ensure accuracy and reliability. However, the information provided on this website is for educational and informational purposes only and should not be considered professional medical advice.
+              All articles published on Daily Well Fact are created for informational and educational purposes. We aim to research topics carefully and present them in a way that is helpful and easy to understand for our readers.
             </p>
-            <p style={styles.paragraph}>
-              If you have any questions, suggestions, or feedback, feel free to contact us at{' '}
-              <a href="mailto:dailyhabitfact@gmail.com" style={styles.link}>dailyhabitfact@gmail.com</a>.
-            </p>
+            <p style={styles.paragraph}>Topics we commonly cover include:</p>
+            <ul style={styles.list}>
+              <li>Healthy lifestyle habits</li>
+              <li>Nutrition and diet tips</li>
+              <li>Daily wellness practices</li>
+              <li>Common health questions</li>
+              <li>Preventive health awareness</li>
+            </ul>
           </div>
         </section>
 
@@ -45,12 +63,33 @@ const About: NextPage = () => {
             <div style={styles.authorInfo}>
               <h3 style={styles.authorName}>Vijay Sharma</h3>
               <p style={styles.authorBio}>
-                Vijay Sharma is a health and wellness writer and the founder of Daily Well Fact. He is passionate about sharing simple health tips, nutrition advice, and lifestyle guides to help people improve their daily habits and overall well-being.
+                Vijay Sharma is the founder and writer behind Daily Well Fact. He is passionate about health, lifestyle improvement, and sharing practical wellness knowledge with readers. Through this website, he aims to simplify health topics so that readers can easily understand them and apply healthy habits in their daily lives.
               </p>
               <p style={styles.authorContact}>
                 For inquiries: <a href="mailto:dailyhabitfact@gmail.com" style={styles.link}>dailyhabitfact@gmail.com</a>
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* Disclaimer Section */}
+        <section style={styles.section}>
+          <h2 style={styles.subtitle}>Important Disclaimer</h2>
+          <div style={styles.content}>
+            <p style={styles.paragraph}>
+              The information provided on Daily Well Fact is for educational and informational purposes only. It is not intended to replace professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional for medical concerns.
+            </p>
+          </div>
+        </section>
+
+        {/* Contact Section */}
+        <section style={styles.section}>
+          <h2 style={styles.subtitle}>Contact Us</h2>
+          <div style={styles.content}>
+            <p style={styles.paragraph}>
+              If you have any questions, suggestions, or feedback, feel free to contact us at{' '}
+              <a href="mailto:dailyhabitfact@gmail.com" style={styles.link}>dailyhabitfact@gmail.com</a>.
+            </p>
           </div>
         </section>
       </div>
@@ -102,6 +141,10 @@ const styles = {
     color: '#4b5563',
   },
   paragraph: {
+    marginBottom: '1.25rem',
+  },
+  list: {
+    paddingLeft: '1.5rem',
     marginBottom: '1.25rem',
   },
   link: {
