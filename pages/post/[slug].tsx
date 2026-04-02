@@ -79,6 +79,58 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
   return (
     <Layout>
+      <style jsx>{`
+        /* Responsive grid - mobile first */
+        .related-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+          margin-top: 1.5rem;
+        }
+        @media (min-width: 640px) {
+          .related-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (min-width: 1024px) {
+          .related-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+        /* Card hover effects */
+        .related-card {
+          background: white;
+          border-radius: 0.75rem;
+          overflow: hidden;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .related-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.02);
+        }
+        .related-card:hover .related-title {
+          color: #10b981;
+        }
+        .related-title {
+          transition: color 0.2s ease;
+        }
+        /* Image zoom on hover */
+        .related-image-wrapper {
+          position: relative;
+          width: 100%;
+          height: 160px;
+          overflow: hidden;
+        }
+        .related-image {
+          object-fit: cover;
+          transition: transform 0.3s ease;
+        }
+        .related-card:hover .related-image {
+          transform: scale(1.05);
+        }
+      `}</style>
+
       <article style={styles.container}>
         <Link href="/" style={styles.backLink}>
           ← Back to all posts
@@ -164,26 +216,25 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
         {relatedPosts.length > 0 && (
           <section style={styles.relatedSection}>
             <h2 style={styles.relatedTitle}>You Might Also Like</h2>
-            <div style={styles.relatedGrid}>
+            <div className="related-grid">
               {relatedPosts.map((related) => (
-                <div key={related._id} style={styles.relatedCard}>
+                <div key={related._id} className="related-card">
                   {related.mainImage && (
-                    <Link href={`/post/${related.slug.current}`} style={styles.relatedImageLink}>
-                      <div style={styles.relatedImageWrapper}>
+                    <Link href={`/post/${related.slug.current}`} style={{ display: 'block' }}>
+                      <div className="related-image-wrapper">
                         <Image
                           src={urlFor(related.mainImage).width(400).url()}
                           alt={related.title}
-                          width={400}
-                          height={160}
-                          style={styles.relatedImage}
+                          fill
+                          className="related-image"
                           loading="lazy"
-                          sizes="(max-width: 768px) 100vw, 400px"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       </div>
                     </Link>
                   )}
                   <div style={styles.relatedCardContent}>
-                    <Link href={`/post/${related.slug.current}`} style={styles.relatedCardTitle}>
+                    <Link href={`/post/${related.slug.current}`} className="related-title" style={styles.relatedCardTitle}>
                       {related.title}
                     </Link>
                     <p style={styles.relatedCardMeta}>
@@ -355,29 +406,6 @@ const styles = {
     marginBottom: '1.5rem',
     color: '#1f2937',
   },
-  relatedGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-    gap: '1.5rem',
-  },
-  relatedCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: '0.75rem',
-    overflow: 'hidden',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-    transition: 'transform 0.2s, box-shadow 0.2s',
-  },
-  relatedImageLink: {
-    display: 'block',
-  },
-  relatedImageWrapper: {
-    position: 'relative' as const,
-    width: '100%',
-    height: '160px',
-  },
-  relatedImage: {
-    objectFit: 'cover' as const,
-  },
   relatedCardContent: {
     padding: '1rem',
   },
@@ -434,7 +462,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   return {
     props: { post, relatedPosts },
-    revalidate: 60, // Revalidate every 60 seconds
+    revalidate: 60,
   };
 };
 
