@@ -63,7 +63,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   return (
     <Layout>
       <article style={styles.container}>
-        {/* Fixed: Link without nested <a> */}
         <Link href="/" style={styles.backLink}>
           ← Back to all posts
         </Link>
@@ -88,7 +87,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           <PortableText value={post.body} components={components} />
         </div>
 
-        {/* SHARE SECTION */}
         <div style={styles.shareSection}>
           <p style={styles.shareText}>Share this article:</p>
           <div style={styles.shareButtons}>
@@ -119,7 +117,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           </div>
         </div>
 
-        {/* AUTHOR BIO */}
         <div style={styles.authorBio}>
           <div style={styles.authorAvatar}>
             <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -132,7 +129,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
             <h4 style={styles.authorName}>{authorName}</h4>
             <p style={styles.authorDesc}>
               Health & wellness writer, founder of Daily Well Fact. Learn more{' '}
-              {/* Fixed: Link without nested <a> */}
               <Link href="/about" style={styles.authorLink}>
                 on the About page
               </Link>.
@@ -140,7 +136,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           </div>
         </div>
 
-        {/* RELATED POSTS */}
         {relatedPosts.length > 0 && (
           <section style={styles.relatedSection}>
             <h2 style={styles.relatedTitle}>You Might Also Like</h2>
@@ -148,7 +143,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               {relatedPosts.map((related) => (
                 <div key={related._id} style={styles.relatedCard}>
                   {related.mainImage && (
-                    {/* Fixed: Link without nested <a> */}
                     <Link href={`/post/${related.slug.current}`} style={styles.relatedImageLink}>
                       <img
                         src={urlFor(related.mainImage).width(400).url()}
@@ -158,7 +152,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
                     </Link>
                   )}
                   <div style={styles.relatedCardContent}>
-                    {/* Fixed: Link without nested <a> */}
                     <Link href={`/post/${related.slug.current}`} style={styles.relatedCardTitle}>
                       {related.title}
                     </Link>
