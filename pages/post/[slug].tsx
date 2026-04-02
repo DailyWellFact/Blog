@@ -1,5 +1,6 @@
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import { client, urlFor } from '../../lib/sanity';
@@ -30,16 +31,23 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
   const shareText = encodeURIComponent(`Check out "${post.title}" on Daily Well Fact`);
 
+  // Optimized PortableText components with Next.js Image
   const components = {
     types: {
       image: ({ value }: any) => {
         if (!value?.asset?._ref) return null;
+        const imageUrl = urlFor(value).width(800).url();
         return (
-          <img
-            src={urlFor(value).width(800).url()}
-            alt={value.alt || 'Blog Image'}
-            style={styles.blogImage}
-          />
+          <div style={styles.imageWrapper}>
+            <Image
+              src={imageUrl}
+              alt={value.alt || 'Blog Image'}
+              width={800}
+              height={500} // Adjust based on your typical aspect ratio, or use layout="responsive" with intrinsic dimensions
+              style={styles.blogImage}
+              loading="lazy"
+            />
+          </div>
         );
       },
     },
@@ -60,6 +68,9 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
     },
   };
 
+  // Get optimized URLs
+  const mainImageUrl = post.mainImage ? urlFor(post.mainImage).width(800).url() : null;
+
   return (
     <Layout>
       <article style={styles.container}>
@@ -76,13 +87,21 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
             day: 'numeric',
           })}
         </div>
-        {post.mainImage && (
-          <img
-            src={urlFor(post.mainImage).width(800).url()}
-            alt={post.title}
-            style={styles.featuredImage}
-          />
+
+        {mainImageUrl && (
+          <div style={styles.featuredImageWrapper}>
+            <Image
+              src={mainImageUrl}
+              alt={post.title}
+              width={800}
+              height={500} // Adjust based on your image aspect ratio; you can also use layout="responsive"
+              style={styles.featuredImage}
+              priority // Highest priority - loads immediately
+              sizes="(max-width: 800px) 100vw, 800px"
+            />
+          </div>
         )}
+
         <div style={styles.content}>
           <PortableText value={post.body} components={components} />
         </div>
@@ -144,11 +163,17 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
                 <div key={related._id} style={styles.relatedCard}>
                   {related.mainImage && (
                     <Link href={`/post/${related.slug.current}`} style={styles.relatedImageLink}>
-                      <img
-                        src={urlFor(related.mainImage).width(400).url()}
-                        alt={related.title}
-                        style={styles.relatedImage}
-                      />
+                      <div style={styles.relatedImageWrapper}>
+                        <Image
+                          src={urlFor(related.mainImage).width(400).url()}
+                          alt={related.title}
+                          width={400}
+                          height={160}
+                          style={styles.relatedImage}
+                          loading="lazy"
+                          sizes="(max-width: 768px) 100vw, 400px"
+                        />
+                      </div>
                     </Link>
                   )}
                   <div style={styles.relatedCardContent}>
@@ -196,11 +221,15 @@ const styles = {
     color: '#6b7280',
     marginBottom: '1.5rem',
   },
+  featuredImageWrapper: {
+    width: '100%',
+    marginBottom: '2rem',
+    position: 'relative' as const,
+  },
   featuredImage: {
     width: '100%',
     height: 'auto',
     borderRadius: '0.75rem',
-    marginBottom: '2rem',
   },
   content: {
     fontSize: '1.125rem',
@@ -208,9 +237,14 @@ const styles = {
     color: '#1f2937',
     marginBottom: '2rem',
   },
-  blogImage: {
+  imageWrapper: {
     width: '100%',
     margin: '1.5rem 0',
+    position: 'relative' as const,
+  },
+  blogImage: {
+    width: '100%',
+    height: 'auto',
     borderRadius: '0.5rem',
   },
   link: {
@@ -316,9 +350,12 @@ const styles = {
   relatedImageLink: {
     display: 'block',
   },
-  relatedImage: {
+  relatedImageWrapper: {
+    position: 'relative' as const,
     width: '100%',
     height: '160px',
+  },
+  relatedImage: {
     objectFit: 'cover' as const,
   },
   relatedCardContent: {
