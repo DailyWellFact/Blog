@@ -21,10 +21,8 @@ interface Props {
 }
 
 const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
-  // Author name – fallback to "Daily Well Fact" if not set
   const authorName = post.author || 'Daily Well Fact';
 
-  // Client‑side share URL (to avoid window undefined on server)
   const [shareUrl, setShareUrl] = useState('');
   useEffect(() => {
     setShareUrl(window.location.href);
@@ -65,9 +63,11 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   return (
     <Layout>
       <article style={styles.container}>
-        <Link href="/">
-          <a style={styles.backLink}>← Back to all posts</a>
+        {/* Fixed: Link without nested <a> */}
+        <Link href="/" style={styles.backLink}>
+          ← Back to all posts
         </Link>
+
         <h1 style={styles.title}>{post.title}</h1>
         <div style={styles.meta}>
           By {authorName} •{' '}
@@ -88,7 +88,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           <PortableText value={post.body} components={components} />
         </div>
 
-        {/* SHARE SECTION – from Page 2 */}
+        {/* SHARE SECTION */}
         <div style={styles.shareSection}>
           <p style={styles.shareText}>Share this article:</p>
           <div style={styles.shareButtons}>
@@ -119,10 +119,9 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           </div>
         </div>
 
-        {/* AUTHOR BIO – from Page 2 */}
+        {/* AUTHOR BIO */}
         <div style={styles.authorBio}>
           <div style={styles.authorAvatar}>
-            {/* Placeholder avatar – same as Page 2 */}
             <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="30" cy="30" r="30" fill="#10b981" />
               <path d="M30 15 C35 15 39 19 39 24 C39 29 35 33 30 33 C25 33 21 29 21 24 C21 19 25 15 30 15 Z" fill="white" />
@@ -133,14 +132,15 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
             <h4 style={styles.authorName}>{authorName}</h4>
             <p style={styles.authorDesc}>
               Health & wellness writer, founder of Daily Well Fact. Learn more{' '}
-              <Link href="/about">
-                <a style={styles.authorLink}>on the About page</a>
+              {/* Fixed: Link without nested <a> */}
+              <Link href="/about" style={styles.authorLink}>
+                on the About page
               </Link>.
             </p>
           </div>
         </div>
 
-        {/* RELATED POSTS – from Page 1 (kept as is) */}
+        {/* RELATED POSTS */}
         {relatedPosts.length > 0 && (
           <section style={styles.relatedSection}>
             <h2 style={styles.relatedTitle}>You Might Also Like</h2>
@@ -148,19 +148,19 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               {relatedPosts.map((related) => (
                 <div key={related._id} style={styles.relatedCard}>
                   {related.mainImage && (
-                    <Link href={`/post/${related.slug.current}`}>
-                      <a style={styles.relatedImageLink}>
-                        <img
-                          src={urlFor(related.mainImage).width(400).url()}
-                          alt={related.title}
-                          style={styles.relatedImage}
-                        />
-                      </a>
+                    {/* Fixed: Link without nested <a> */}
+                    <Link href={`/post/${related.slug.current}`} style={styles.relatedImageLink}>
+                      <img
+                        src={urlFor(related.mainImage).width(400).url()}
+                        alt={related.title}
+                        style={styles.relatedImage}
+                      />
                     </Link>
                   )}
                   <div style={styles.relatedCardContent}>
-                    <Link href={`/post/${related.slug.current}`}>
-                      <a style={styles.relatedCardTitle}>{related.title}</a>
+                    {/* Fixed: Link without nested <a> */}
+                    <Link href={`/post/${related.slug.current}`} style={styles.relatedCardTitle}>
+                      {related.title}
                     </Link>
                     <p style={styles.relatedCardMeta}>
                       {new Date(related.publishedAt).toLocaleDateString('en-US', {
@@ -180,7 +180,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   );
 };
 
-// Styles – mix of Page 1 (container, content, etc.) and new sections from Page 2
 const styles = {
   container: {
     maxWidth: 800,
@@ -242,7 +241,6 @@ const styles = {
     marginBottom: '0.75rem',
     color: '#111827',
   },
-  // Share section (from Page 2, adjusted to match Page 1’s spacing)
   shareSection: {
     margin: '2rem 0',
     padding: '1.5rem 0',
@@ -270,7 +268,6 @@ const styles = {
     fontWeight: 500,
     transition: 'background 0.2s',
   },
-  // Author bio (from Page 2)
   authorBio: {
     display: 'flex',
     gap: '1rem',
@@ -300,7 +297,6 @@ const styles = {
     color: '#10b981',
     textDecoration: 'underline',
   },
-  // Related posts (from Page 1)
   relatedSection: {
     marginTop: '4rem',
     paddingTop: '2rem',
@@ -350,7 +346,6 @@ const styles = {
   },
 };
 
-// getStaticPaths and getStaticProps remain exactly as in Page 1
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = await client.fetch(
     `*[_type == "post" && defined(slug.current)]{ "slug": slug.current }`
@@ -362,7 +357,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  // Fetch the current post
   const query = `*[_type == "post" && slug.current == $slug][0]{
     _id,
     title,
@@ -374,7 +368,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }`;
   const post = await client.fetch(query, { slug: params?.slug });
 
-  // Fetch all posts for related suggestions
   const allPostsQuery = `*[_type == "post"]{
     _id,
     title,
@@ -385,7 +378,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }`;
   const allPosts = await client.fetch(allPostsQuery);
 
-  // Exclude current post and pick up to 3 random ones
   const otherPosts = allPosts.filter((p: Post) => p._id !== post?._id);
   const shuffled = otherPosts.sort(() => 0.5 - Math.random());
   const relatedPosts = shuffled.slice(0, 3);
