@@ -411,7 +411,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const shuffled = otherPosts.sort(() => 0.5 - Math.random());
   const relatedPosts = shuffled.slice(0, 3);
 
-  return { props: { post, relatedPosts } };
+  return {
+    props: { post, relatedPosts },
+    revalidate: 60, // Revalidate page every 60 seconds after build
+  };
 };
 
 export default PostPage;
