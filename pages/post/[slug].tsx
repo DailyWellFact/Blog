@@ -31,7 +31,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
   const shareText = encodeURIComponent(`Check out "${post.title}" on Daily Well Fact`);
 
-  // Optimized PortableText components with Next.js Image
   const components = {
     types: {
       image: ({ value }: any) => {
@@ -43,7 +42,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               src={imageUrl}
               alt={value.alt || 'Blog Image'}
               width={800}
-              height={500} // Adjust based on your typical aspect ratio, or use layout="responsive" with intrinsic dimensions
+              height={500}
               style={styles.blogImage}
               loading="lazy"
             />
@@ -66,9 +65,16 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
       h2: ({ children }: any) => <h2 style={styles.h2}>{children}</h2>,
       h3: ({ children }: any) => <h3 style={styles.h3}>{children}</h3>,
     },
+    list: {
+      bullet: ({ children }: any) => <ul style={styles.bulletList}>{children}</ul>,
+      number: ({ children }: any) => <ol style={styles.numberList}>{children}</ol>,
+    },
+    listItem: {
+      bullet: ({ children }: any) => <li style={styles.listItem}>{children}</li>,
+      number: ({ children }: any) => <li style={styles.listItem}>{children}</li>,
+    },
   };
 
-  // Get optimized URLs
   const mainImageUrl = post.mainImage ? urlFor(post.mainImage).width(800).url() : null;
 
   return (
@@ -94,9 +100,9 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               src={mainImageUrl}
               alt={post.title}
               width={800}
-              height={500} // Adjust based on your image aspect ratio; you can also use layout="responsive"
+              height={500}
               style={styles.featuredImage}
-              priority // Highest priority - loads immediately
+              priority
               sizes="(max-width: 800px) 100vw, 800px"
             />
           </div>
@@ -254,6 +260,20 @@ const styles = {
   paragraph: {
     marginBottom: '1.25rem',
   },
+  bulletList: {
+    marginBottom: '1.25rem',
+    paddingLeft: '1.5rem',
+    listStyleType: 'disc',
+  },
+  numberList: {
+    marginBottom: '1.25rem',
+    paddingLeft: '1.5rem',
+    listStyleType: 'decimal',
+  },
+  listItem: {
+    marginBottom: '0.5rem',
+    lineHeight: 1.6,
+  },
   h2: {
     fontSize: '1.875rem',
     fontWeight: 'bold',
@@ -385,6 +405,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: false,
   };
 };
+
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const query = `*[_type == "post" && slug.current == $slug][0]{
     _id,
@@ -413,7 +434,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   return {
     props: { post, relatedPosts },
-    revalidate: 60, // Revalidate page every 60 seconds after build
+    revalidate: 60, // Revalidate every 60 seconds
   };
 };
 
