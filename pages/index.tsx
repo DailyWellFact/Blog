@@ -92,7 +92,6 @@ const Home: NextPage<Props> = ({ posts }) => {
           />
         </div>
       </section>
-
       {/* FEATURED */}
       {!searchTerm && featuredPost && (
         <section style={styles.featured}>
