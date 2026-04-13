@@ -20,7 +20,11 @@ interface Props {
 }
 
 const formatDate = (date: string) =>
-  new Date(date).toISOString().split('T')[0];
+  new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
 const Home: NextPage<Props> = ({ posts }) => {
   const [searchTerm, setSearchTerm] = useState('');
