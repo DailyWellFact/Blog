@@ -1,6 +1,7 @@
 import type { NextPage } from 'next';
 import Layout from '../components/Layout';
 import { useState } from 'react';
+import SEO from "../components/SEO";
 
 const Contact: NextPage = () => {
   const [formData, setFormData] = useState({
@@ -45,6 +46,12 @@ const Contact: NextPage = () => {
   };
 
   return (
+    <>
+      <SEO
+  title="Contact Daily Well Fact"
+  description="Reach out for feedback, corrections, or inquiries."
+  canonical="https://dailywellfact.com/contact"
+/>
     <Layout>
       <div style={styles.container}>
         <h1 style={styles.title}>Contact Us</h1>
@@ -143,6 +150,7 @@ const Contact: NextPage = () => {
         }
       `}</style>
     </Layout>
+    </>
   );
 };
 
