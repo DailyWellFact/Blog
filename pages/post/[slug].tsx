@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import { client, urlFor } from '../../lib/sanity';
 import { PortableText } from '@portabletext/react';
-
+import SEO from '../../components/SEO';
 interface Post {
   _id: string;
   title: string;
@@ -78,6 +78,12 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   const mainImageUrl = post.mainImage ? urlFor(post.mainImage).width(800).url() : null;
 
   return (
+    <>
+      <SEO
+  title={post.metaTitle || post.title}
+  description={post.metaDescription || post.excerpt}
+  canonical={`https://dailywellfact.com/post/${post.slug.current}`}
+/>
     <Layout>
       <style jsx>{`
         /* Responsive grid - mobile first */
