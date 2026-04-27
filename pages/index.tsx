@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { client, urlFor } from '../lib/sanity';
 import type { CSSProperties } from 'react';
+import SEO from "../components/SEO";
 
 interface Post {
   _id: string;
@@ -60,6 +61,14 @@ const Home: NextPage<Props> = ({ posts }) => {
   const hasMore = visibleCount < gridPosts.length;
 
   return (
+    <>
+      <SEO
+        title="Daily Well Fact | Simple Health and Wellness Facts"
+        description="Read clear, practical, and educational health, nutrition, fitness, and wellness articles."
+        canonical="https://dailywellfact.com/"
+      />
+
+    
     <Layout>
       {/* HERO */}
       <section style={styles.hero}>
@@ -215,6 +224,7 @@ const Home: NextPage<Props> = ({ posts }) => {
         }
       `}</style>
     </Layout>
+    </>
   );
 };
 
