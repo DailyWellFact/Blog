@@ -1,8 +1,14 @@
 import type { NextPage } from 'next';
 import Layout from '../components/Layout';
-
+import SEO from "../components/SEO";
 const About: NextPage = () => {
   return (
+    <>
+      <SEO
+  title="About Daily Well Fact"
+  description="Learn about our mission, editorial standards, and how we create health content."
+  canonical="https://dailywellfact.com/about"
+/>
     <Layout>
       <div style={styles.container}>
         {/* Site Section */}
@@ -109,6 +115,7 @@ const About: NextPage = () => {
         }
       `}</style>
     </Layout>
+    </>
   );
 };
 
