@@ -1,9 +1,10 @@
+// pages/post/[slug].tsx
 import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import Head from 'next/head';
 import Layout from '../../components/Layout';
+import SEO from '../../components/SEO';
 import { client, urlFor } from '../../lib/sanity';
 import { PortableText } from '@portabletext/react';
 
@@ -14,6 +15,9 @@ interface Post {
   mainImage: any;
   author?: string;
   publishedAt: string;
+  updatedAt?: string;
+  category?: string;
+  sources?: string[];
   body: any;
   metaTitle?: string;
   metaDescription?: string;
@@ -34,7 +38,20 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
     post.metaDescription || post.excerpt || `${post.title.substring(0, 150)}...` || fallbackDescription;
   const canonicalUrl = `https://dailywellfact.com/post/${post.slug.current}`;
   const mainImageUrl = post.mainImage ? urlFor(post.mainImage).width(1200).url() : null;
+
   const publishedDate = new Date(post.publishedAt).toISOString();
+  const updatedDate = post.updatedAt ? new Date(post.updatedAt).toISOString() : null;
+  const displayPublishedDate = new Date(post.publishedAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const displayUpdatedDate = updatedDate ? new Date(post.updatedAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }) : null;
+  const showUpdated = updatedDate && updatedDate !== publishedDate;
 
   const [shareUrl, setShareUrl] = useState('');
   useEffect(() => {
@@ -43,6 +60,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
   const shareText = encodeURIComponent(`Check out "${post.title}" on Daily Well Fact`);
 
+  // PortableText components (same as before)
   const components = {
     types: {
       image: ({ value }: any) => {
@@ -88,6 +106,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
     },
   };
 
+  // JSON-LD Schema (complete)
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -95,6 +114,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
     description: metaDescription,
     image: mainImageUrl ? [mainImageUrl] : [],
     datePublished: publishedDate,
+    dateModified: updatedDate || publishedDate,
     author: {
       '@type': 'Person',
       name: authorName,
@@ -111,28 +131,21 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
   return (
     <Layout>
-      <Head>
-        <title>{metaTitle}</title>
-        <meta name="description" content={metaDescription} />
-        <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={metaTitle} />
-        <meta property="og:description" content={metaDescription} />
-        {mainImageUrl && <meta property="og:image" content={mainImageUrl} />}
-        <meta property="og:type" content="article" />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="Daily Well Fact" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={metaTitle} />
-        <meta name="twitter:description" content={metaDescription} />
-        {mainImageUrl && <meta name="twitter:image" content={mainImageUrl} />}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
+      <SEO
+        title={metaTitle}
+        description={metaDescription}
+        canonical={canonicalUrl}
+        ogType="article"
+        ogImage={mainImageUrl}
+      />
+
+      {/* JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       <style jsx>{`
-        /* Responsive grid - mobile first */
         .related-grid {
           display: grid;
           grid-template-columns: 1fr;
@@ -149,7 +162,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
             grid-template-columns: repeat(3, 1fr);
           }
         }
-        /* Card hover effects */
         .related-card {
           background: white;
           border-radius: 0.75rem;
@@ -167,7 +179,6 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
         .related-title {
           transition: color 0.2s ease;
         }
-        /* Image zoom on hover */
         .related-image-wrapper {
           position: relative;
           width: 100%;
@@ -190,12 +201,9 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
         <h1 style={styles.title}>{post.title}</h1>
         <div style={styles.meta}>
-          By {authorName} •{' '}
-          {new Date(post.publishedAt).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          By {authorName} • {displayPublishedDate}
+          {showUpdated && ` (Updated: ${displayUpdatedDate})`}
+          {post.category && ` • ${post.category}`}
         </div>
 
         {mainImageUrl && (
@@ -216,12 +224,34 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           <PortableText value={post.body} components={components} />
         </div>
 
-        {/* Medical Disclaimer Block */}
+        {/* Sources section */}
+        {post.sources && post.sources.length > 0 && (
+          <div style={styles.sourcesBox}>
+            <h3 style={styles.sourcesHeading}>Sources & References</h3>
+            <ul style={styles.sourcesList}>
+              {post.sources.map((src, idx) => (
+                <li key={idx} style={styles.sourcesListItem}>
+                  {src.startsWith('http') ? (
+                    <a href={src} target="_blank" rel="noopener noreferrer" style={styles.link}>
+                      {src}
+                    </a>
+                  ) : (
+                    src
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Expanded Medical Disclaimer */}
         <div style={styles.disclaimerBox}>
           <p style={styles.disclaimerText}>
-            <strong>Medical Disclaimer:</strong> The information provided on Daily Well Fact is for
-            educational and informational purposes only and is not intended as medical advice.
-            Always consult a qualified healthcare professional before making any health decisions.
+            <strong>⚠️ MEDICAL DISCLAIMER:</strong> This article is for educational purposes only
+            and does not constitute medical advice. The information provided should not be used to
+            diagnose, treat, cure, or prevent any medical condition. Always consult with a qualified
+            healthcare professional before making changes to your health routine or treatment plan.
+            <strong> In case of a medical emergency, please call 911 or visit the nearest emergency room.</strong>
           </p>
         </div>
 
@@ -316,6 +346,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   );
 };
 
+// Styles object (add new sourceBox styles)
 const styles = {
   container: {
     maxWidth: 800,
@@ -496,6 +527,28 @@ const styles = {
     margin: 0,
     lineHeight: 1.5,
   },
+  sourcesBox: {
+    backgroundColor: '#f0fdf4',
+    borderLeft: '4px solid #10b981',
+    padding: '1rem 1.25rem',
+    margin: '2rem 0',
+    borderRadius: '0.5rem',
+  },
+  sourcesHeading: {
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem',
+    color: '#065f46',
+  },
+  sourcesList: {
+    margin: 0,
+    paddingLeft: '1.5rem',
+  },
+  sourcesListItem: {
+    fontSize: '0.875rem',
+    color: '#065f46',
+    marginBottom: '0.25rem',
+  },
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -516,12 +569,19 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     mainImage,
     author,
     publishedAt,
+    updatedAt,
+    category,
+    sources,
     body,
-    "metaTitle": metaTitle,
-    "metaDescription": metaDescription,
-    "excerpt": excerpt
+    metaTitle,
+    metaDescription,
+    excerpt
   }`;
   const post = await client.fetch(query, { slug: params?.slug });
+
+  if (!post) {
+    return { notFound: true };
+  }
 
   const allPostsQuery = `*[_type == "post"]{
     _id,
@@ -533,7 +593,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }`;
   const allPosts = await client.fetch(allPostsQuery);
 
-  const otherPosts = allPosts.filter((p: Post) => p._id !== post?._id);
+  const otherPosts = allPosts.filter((p: Post) => p._id !== post._id);
   const shuffled = otherPosts.sort(() => 0.5 - Math.random());
   const relatedPosts = shuffled.slice(0, 3);
 
