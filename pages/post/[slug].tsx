@@ -1,11 +1,12 @@
-import { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import Link from "next/link";
-import Image from "next/image";
-import Head from "next/head";
-import Layout from "../../components/Layout";
-import SEO from "../../components/SEO";
-import { client, urlFor } from "../../lib/sanity";
-import { PortableText } from "@portabletext/react";
+import { GetStaticPaths, GetStaticProps, NextPage } from 'next';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import Head from 'next/head';
+import Layout from '../../components/Layout';
+import { client, urlFor } from '../../lib/sanity';
+import { PortableText } from '@portabletext/react';
+import SEO from '../../components/SEO';
 
 interface Post {
   _id: string;
@@ -17,11 +18,11 @@ interface Post {
   category?: string;
   publishedAt: string;
   updatedAt?: string;
-  body: any;
+  excerpt?: string;
   metaTitle?: string;
   metaDescription?: string;
-  excerpt?: string;
   sources?: string[];
+  body: any;
 }
 
 interface Props {
@@ -30,15 +31,21 @@ interface Props {
 }
 
 const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
-  const authorName = post.authorName || "Daily Well Fact";
+  const authorName = post.authorName || 'Daily Well Fact';
+
+  const [shareUrl, setShareUrl] = useState('');
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, []);
+
   const mainImageUrl = post.mainImage
-    ? urlFor(post.mainImage).width(1200).url()
+    ? urlFor(post.mainImage).width(800).url()
     : null;
 
   const description =
     post.metaDescription ||
     post.excerpt ||
-    "Read this health and wellness article on Daily Well Fact.";
+    'Read this health and wellness article on Daily Well Fact.';
 
   return (
     <>
@@ -60,7 +67,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               "@context": "https://schema.org",
               "@type": "Article",
               headline: post.title,
-              description,
+              description: description,
               image: mainImageUrl,
               datePublished: post.publishedAt,
               dateModified: post.updatedAt || post.publishedAt,
@@ -82,46 +89,52 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
       </Head>
 
       <Layout>
-        <article style={{ maxWidth: 800, margin: "0 auto" }}>
-          <Link href="/">← Back to all posts</Link>
+        <article style={styles.container}>
+          <Link href="/" style={styles.backLink}>
+            ← Back to all posts
+          </Link>
 
-          <h1>{post.title}</h1>
+          <h1 style={styles.title}>{post.title}</h1>
 
-          <p>
-            By <strong>{authorName}</strong> •{" "}
-            {new Date(post.publishedAt).toDateString()}
+          <div style={styles.meta}>
+            By {authorName} •{' '}
+            {new Date(post.publishedAt).toLocaleDateString()}
             {post.updatedAt && (
-              <> • Updated {new Date(post.updatedAt).toDateString()}</>
+              <> • Updated {new Date(post.updatedAt).toLocaleDateString()}</>
             )}
-          </p>
-
-          {post.category && <p>Category: {post.category}</p>}
+            {post.category && <> • {post.category}</>}
+          </div>
 
           {mainImageUrl && (
-            <Image
-              src={mainImageUrl}
-              alt={post.title}
-              width={1200}
-              height={700}
-              priority
-            />
+            <div style={styles.featuredImageWrapper}>
+              <Image
+                src={mainImageUrl}
+                alt={post.title}
+                width={800}
+                height={500}
+                style={styles.featuredImage}
+                priority
+              />
+            </div>
           )}
 
-          <PortableText value={post.body} />
+          <div style={styles.content}>
+            <PortableText value={post.body} />
+          </div>
 
           {/* MEDICAL DISCLAIMER */}
-          <div style={{ marginTop: "2rem", padding: "1rem", border: "1px solid #ddd" }}>
-            <strong>Medical Disclaimer:</strong>
+          <div style={styles.disclaimer}>
+            <strong>⚠️ Medical Disclaimer</strong>
             <p>
-              This content is for educational purposes only and does not
+              This article is for educational purposes only and does not
               constitute medical advice. Always consult a qualified healthcare
-              professional.
+              professional before making health decisions.
             </p>
           </div>
 
           {/* SOURCES */}
           {post.sources && post.sources.length > 0 && (
-            <div style={{ marginTop: "2rem" }}>
+            <div style={styles.sources}>
               <h3>Sources</h3>
               <ul>
                 {post.sources.map((src, i) => (
@@ -135,24 +148,18 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
             </div>
           )}
 
-          {/* AUTHOR BIO */}
-          <div style={{ marginTop: "2rem" }}>
-            <h4>{authorName}</h4>
-            <p>{post.authorBio || "Health & wellness writer at Daily Well Fact."}</p>
-          </div>
-
-          {/* RELATED POSTS */}
+          {/* RELATED POSTS (unchanged design) */}
           {relatedPosts.length > 0 && (
-            <div style={{ marginTop: "3rem" }}>
-              <h3>Related Articles</h3>
-              <ul>
-                {relatedPosts.map((p) => (
-                  <li key={p._id}>
-                    <Link href={`/post/${p.slug.current}`}>{p.title}</Link>
-                  </li>
+            <section style={styles.relatedSection}>
+              <h2>You Might Also Like</h2>
+              <div className="related-grid">
+                {relatedPosts.map((related) => (
+                  <Link key={related._id} href={`/post/${related.slug.current}`}>
+                    {related.title}
+                  </Link>
                 ))}
-              </ul>
-            </div>
+              </div>
+            </section>
           )}
         </article>
       </Layout>
@@ -162,12 +169,12 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const slugs = await client.fetch(
-    `*[_type == "post"]{ "slug": slug.current }`
+    `*[_type == "post" && defined(slug.current)]{ "slug": slug.current }`
   );
 
   return {
     paths: slugs.map((s: any) => ({ params: { slug: s.slug } })),
-    fallback: "blocking",
+    fallback: 'blocking',
   };
 };
 
@@ -183,11 +190,11 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       category,
       publishedAt,
       updatedAt,
-      body,
+      excerpt,
       metaTitle,
       metaDescription,
-      excerpt,
-      sources
+      sources,
+      body
     }`,
     { slug: params?.slug }
   );
@@ -196,7 +203,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     `*[_type == "post" && slug.current != $slug][0...3]{
       _id,
       title,
-      slug
+      slug,
+      mainImage,
+      publishedAt
     }`,
     { slug: params?.slug }
   );
