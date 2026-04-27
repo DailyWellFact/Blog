@@ -39,19 +39,18 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   const canonicalUrl = `https://dailywellfact.com/post/${post.slug.current}`;
   const mainImageUrl = post.mainImage ? urlFor(post.mainImage).width(1200).url() : null;
 
-  const publishedDate = new Date(post.publishedAt).toISOString();
-  const updatedDate = post.updatedAt ? new Date(post.updatedAt).toISOString() : null;
-  const displayPublishedDate = new Date(post.publishedAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-  const displayUpdatedDate = updatedDate ? new Date(post.updatedAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }) : null;
-  const showUpdated = updatedDate && updatedDate !== publishedDate;
+const publishedDate = new Date(post.publishedAt).toISOString();
+const displayPublishedDate = new Date(post.publishedAt).toLocaleDateString('en-US', {
+  year: 'numeric', month: 'long', day: 'numeric'
+});
+
+const updatedDateObj = post.updatedAt ? new Date(post.updatedAt) : null;
+const updatedDate = updatedDateObj?.toISOString() || null;
+const displayUpdatedDate = updatedDateObj?.toLocaleDateString('en-US', {
+  year: 'numeric', month: 'long', day: 'numeric'
+}) || null;
+
+const showUpdated = updatedDate && updatedDate !== publishedDate;
 
   const [shareUrl, setShareUrl] = useState('');
   useEffect(() => {
