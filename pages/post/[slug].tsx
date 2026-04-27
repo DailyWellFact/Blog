@@ -2,11 +2,10 @@ import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Head from "next/head";
-import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
+import SEO from "../../components/SEO";
 import { client, urlFor } from "../../lib/sanity";
 import { PortableText } from "@portabletext/react";
-import SEO from "../../components/SEO";
 
 interface Post {
   _id: string;
@@ -14,13 +13,15 @@ interface Post {
   slug: { current: string };
   mainImage: any;
   authorName?: string;
+  authorBio?: string;
+  category?: string;
   publishedAt: string;
+  updatedAt?: string;
   body: any;
-
-  // NEW FIELDS
   metaTitle?: string;
   metaDescription?: string;
   excerpt?: string;
+  sources?: string[];
 }
 
 interface Props {
@@ -30,19 +31,10 @@ interface Props {
 
 const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   const authorName = post.authorName || "Daily Well Fact";
-
-  const [shareUrl, setShareUrl] = useState("");
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setShareUrl(window.location.href);
-    }
-  }, []);
-
   const mainImageUrl = post.mainImage
-    ? urlFor(post.mainImage).width(800).url()
+    ? urlFor(post.mainImage).width(1200).url()
     : null;
 
-  // 🔥 STRONG SEO FALLBACK
   const description =
     post.metaDescription ||
     post.excerpt ||
@@ -68,9 +60,10 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               "@context": "https://schema.org",
               "@type": "Article",
               headline: post.title,
-              description: description,
+              description,
               image: mainImageUrl,
               datePublished: post.publishedAt,
+              dateModified: post.updatedAt || post.publishedAt,
               author: {
                 "@type": "Person",
                 name: authorName,
@@ -94,56 +87,71 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
           <h1>{post.title}</h1>
 
-          <p style={{ color: "#6b7280" }}>
-            By {authorName} •{" "}
-            {new Date(post.publishedAt).toLocaleDateString()}
+          <p>
+            By <strong>{authorName}</strong> •{" "}
+            {new Date(post.publishedAt).toDateString()}
+            {post.updatedAt && (
+              <> • Updated {new Date(post.updatedAt).toDateString()}</>
+            )}
           </p>
+
+          {post.category && <p>Category: {post.category}</p>}
 
           {mainImageUrl && (
             <Image
               src={mainImageUrl}
               alt={post.title}
-              width={800}
-              height={500}
-              style={{ borderRadius: "12px" }}
+              width={1200}
+              height={700}
               priority
             />
           )}
 
-          <div style={{ marginTop: "2rem" }}>
-            <PortableText value={post.body} />
+          <PortableText value={post.body} />
+
+          {/* MEDICAL DISCLAIMER */}
+          <div style={{ marginTop: "2rem", padding: "1rem", border: "1px solid #ddd" }}>
+            <strong>Medical Disclaimer:</strong>
+            <p>
+              This content is for educational purposes only and does not
+              constitute medical advice. Always consult a qualified healthcare
+              professional.
+            </p>
           </div>
 
-          {/* 🔥 MEDICAL DISCLAIMER */}
-          <div
-            style={{
-              marginTop: "2rem",
-              padding: "1rem",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              background: "#f9fafb",
-            }}
-          >
-            <strong>Medical Disclaimer:</strong>
-            <p style={{ marginTop: "0.5rem", fontSize: "0.9rem" }}>
-              This article is for educational purposes only and does not
-              constitute medical advice. Always consult a qualified healthcare
-              professional before making health decisions.
-            </p>
+          {/* SOURCES */}
+          {post.sources && post.sources.length > 0 && (
+            <div style={{ marginTop: "2rem" }}>
+              <h3>Sources</h3>
+              <ul>
+                {post.sources.map((src, i) => (
+                  <li key={i}>
+                    <a href={src} target="_blank" rel="noopener noreferrer">
+                      {src}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* AUTHOR BIO */}
+          <div style={{ marginTop: "2rem" }}>
+            <h4>{authorName}</h4>
+            <p>{post.authorBio || "Health & wellness writer at Daily Well Fact."}</p>
           </div>
 
           {/* RELATED POSTS */}
           {relatedPosts.length > 0 && (
             <div style={{ marginTop: "3rem" }}>
-              <h2>You Might Also Like</h2>
-
-              {relatedPosts.map((p) => (
-                <div key={p._id} style={{ marginBottom: "1rem" }}>
-                  <Link href={`/post/${p.slug.current}`}>
-                    {p.title}
-                  </Link>
-                </div>
-              ))}
+              <h3>Related Articles</h3>
+              <ul>
+                {relatedPosts.map((p) => (
+                  <li key={p._id}>
+                    <Link href={`/post/${p.slug.current}`}>{p.title}</Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </article>
@@ -158,9 +166,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   );
 
   return {
-    paths: slugs.map((s: any) => ({
-      params: { slug: s.slug },
-    })),
+    paths: slugs.map((s: any) => ({ params: { slug: s.slug } })),
     fallback: "blocking",
   };
 };
@@ -173,22 +179,26 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       slug,
       mainImage,
       authorName,
+      authorBio,
+      category,
       publishedAt,
+      updatedAt,
       body,
       metaTitle,
       metaDescription,
-      excerpt
+      excerpt,
+      sources
     }`,
     { slug: params?.slug }
   );
 
   const relatedPosts = await client.fetch(
-    `*[_type == "post" && _id != $id][0...3]{
+    `*[_type == "post" && slug.current != $slug][0...3]{
       _id,
       title,
       slug
     }`,
-    { id: post._id }
+    { slug: params?.slug }
   );
 
   return {
