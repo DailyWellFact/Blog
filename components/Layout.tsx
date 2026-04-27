@@ -1,3 +1,4 @@
+// components/Layout.tsx
 import React, { useState } from 'react';
 import Link from 'next/link';
 
@@ -5,7 +6,6 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-// FIX: deterministic year
 const currentYear = new Date().getFullYear();
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -18,7 +18,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          {/* FIX: modern Link usage */}
           <Link href="/" style={styles.logo}>
             Daily Well Fact
           </Link>
@@ -55,6 +54,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Link href="/contact" style={styles.navLink} onClick={closeMenu}>Contact</Link>
             <Link href="/privacy" style={styles.navLink} onClick={closeMenu}>Privacy</Link>
             <Link href="/disclaimer" style={styles.navLink} onClick={closeMenu}>Disclaimer</Link>
+            <Link href="/terms" style={styles.navLink} onClick={closeMenu}>Terms</Link>
+            <Link href="/editorial-policy" style={styles.navLink} onClick={closeMenu}>Editorial Policy</Link>
           </nav>
         </div>
       </header>
@@ -75,7 +76,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Link href="/about" style={styles.footerLink}>About Us</Link>
             <Link href="/contact" style={styles.footerLink}>Contact</Link>
             <Link href="/privacy" style={styles.footerLink}>Privacy Policy</Link>
-            <Link href="/disclaimer" style={styles.footerLink}>Disclaimer</Link>
+            <Link href="/disclaimer" style={styles.footerLink}>Medical Disclaimer</Link>
+            <Link href="/terms" style={styles.footerLink}>Terms & Conditions</Link>
+            <Link href="/editorial-policy" style={styles.footerLink}>Editorial Policy</Link>
           </div>
 
           <div style={styles.footerColumn}>
@@ -87,7 +90,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
 
         <div style={styles.copyright}>
-          {/* FIX: stable year */}
           <p>© {currentYear} Daily Well Fact. All rights reserved.</p>
         </div>
       </footer>
@@ -95,7 +97,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <style jsx>{`
         .nav {
           display: flex;
-          gap: 2rem;
+          gap: 1.5rem;
         }
 
         @media (max-width: 768px) {
@@ -113,6 +115,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             padding: 1rem 2rem;
             border-bottom: 1px solid #e5e7eb;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            gap: 0.75rem;
           }
           .nav.nav-open {
             display: flex;
@@ -232,6 +235,10 @@ const styles = {
     color: '#9ca3af',
     textDecoration: 'none',
     fontSize: '0.85rem',
+    transition: 'color 0.2s',
+    ':hover': {
+      color: '#10b981',
+    },
   },
   copyright: {
     maxWidth: 1280,
