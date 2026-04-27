@@ -1,8 +1,15 @@
 import type { NextPage } from 'next';
 import Layout from '../components/Layout';
+import SEO from '../components/SEO';
 
 const Disclaimer: NextPage = () => {
   return (
+    <>
+      <SEO
+  title="Medical Disclaimer | Daily Well Fact"
+  description="Important health and medical disclaimer for our content."
+  canonical="https://dailywellfact.com/disclaimer"
+/>
     <Layout>
       <div style={styles.container}>
         <h1 style={styles.title}>Disclaimer</h1>
@@ -28,6 +35,7 @@ const Disclaimer: NextPage = () => {
         </div>
       </div>
     </Layout>
+    </>
   );
 };
 
