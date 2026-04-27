@@ -1,8 +1,15 @@
 import type { NextPage } from 'next';
 import Layout from '../components/Layout';
+import SEO from '../components/SEO';
 
 const Privacy: NextPage = () => {
   return (
+    <>
+      <SEO
+  title="Privacy Policy | Daily Well Fact"
+  description="Learn how we handle user data, cookies, and advertising."
+  canonical="https://dailywellfact.com/privacy"
+/>
     <Layout>
       <div style={styles.container}>
         <h1 style={styles.title}>Privacy Policy</h1>
@@ -56,6 +63,7 @@ const Privacy: NextPage = () => {
         </div>
       </div>
     </Layout>
+    </>
   );
 };
 
