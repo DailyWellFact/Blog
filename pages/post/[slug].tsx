@@ -131,12 +131,12 @@ const showUpdated = updatedDate && updatedDate !== publishedDate;
   return (
     <Layout>
       <SEO
-        title={metaTitle}
-        description={metaDescription}
-        canonical={canonicalUrl}
-        ogType="article"
-        ogImage={mainImageUrl}
-      />
+  title={metaTitle}
+  description={metaDescription}
+  canonical={canonicalUrl}
+  ogType="article"
+  ogImage={mainImageUrl ?? undefined}
+/>
 
       {/* JSON-LD */}
       <script
