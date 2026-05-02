@@ -102,7 +102,7 @@ const Home: NextPage<Props> = ({ posts }) => {
           </div>
         </section>
 
-        {/* FEATURED - FIXED: image no longer overflows on mobile */}
+        {/* FEATURED - fully responsive, no overflow on any screen */}
         {!searchTerm && featuredPost && (
           <section style={styles.featured}>
             <div style={styles.featuredContent}>
@@ -256,7 +256,7 @@ const styles: { [key: string]: CSSProperties } = {
   heroImageWrap: {
     flex: 1,
     minWidth: 280,
-    maxWidth: '100%',           // prevent overflow on mobile
+    maxWidth: '100%',
     overflow: 'hidden',
   },
   heroImage: {
@@ -273,10 +273,12 @@ const styles: { [key: string]: CSSProperties } = {
     padding: '2rem',
     borderRadius: '1rem',
     marginBottom: '3rem',
+    width: '100%',
+    boxSizing: 'border-box',
   },
   featuredContent: {
     flex: 1,
-    minWidth: 280,
+    minWidth: 200,
   },
   badge: {
     background: '#10b981',
@@ -303,15 +305,17 @@ const styles: { [key: string]: CSSProperties } = {
   },
   featuredImageWrap: {
     position: 'relative',
-    flex: 1,
-    minWidth: 280,
-    maxWidth: '100%',           // critical fix – stops image from overflowing right edge
+    flex: '1 1 280px',        // allow grow and shrink, base 280px
+    minWidth: 0,              // critical: allows container to shrink below 280px on tiny screens
+    maxWidth: '100%',         // never exceed parent
     height: 300,
     borderRadius: '0.5rem',
     overflow: 'hidden',
   },
   featuredImage: {
     objectFit: 'cover',
+    width: '100%',
+    height: '100%',
   },
   searchWrap: {
     textAlign: 'center',
