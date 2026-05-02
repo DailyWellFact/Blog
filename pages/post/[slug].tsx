@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import SEO from '../../components/SEO';
 import { client, urlFor } from '../../lib/sanity';
-import { PortableText } from '@portabletext/react';
+import { PortableText, PortableTextComponents } from '@portabletext/react';
+import { CSSProperties } from 'react';
 
 interface Post {
   _id: string;
@@ -41,13 +42,17 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
   const publishedDate = new Date(post.publishedAt).toISOString();
   const displayPublishedDate = new Date(post.publishedAt).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
 
   const updatedDateObj = post.updatedAt ? new Date(post.updatedAt) : null;
   const updatedDate = updatedDateObj?.toISOString() || null;
   const displayUpdatedDate = updatedDateObj?.toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   }) || null;
 
   const showUpdated = updatedDate && updatedDate !== publishedDate;
@@ -59,10 +64,10 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
   const shareText = encodeURIComponent(`Check out "${post.title}" on Daily Well Fact`);
 
-  // PortableText components
-  const components = {
+  // PortableText components with proper types
+  const components: PortableTextComponents = {
     types: {
-      image: ({ value }: any) => {
+      image: ({ value }) => {
         if (!value?.asset?._ref) return null;
         const imageUrl = urlFor(value).width(800).url();
         const altText = value.alt || 'Blog illustration';
@@ -73,7 +78,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               alt={altText}
               width={800}
               height={500}
-              style={styles.blogImage}
+              style={styles.blogImage as CSSProperties}
               loading="lazy"
             />
           </div>
@@ -81,7 +86,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
       },
     },
     marks: {
-      link: ({ children, value }: any) => {
+      link: ({ children, value }) => {
         const href = value?.href || '#';
         return (
           <a href={href} target="_blank" rel="noopener noreferrer" style={styles.link}>
@@ -91,17 +96,17 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
       },
     },
     block: {
-      normal: ({ children }: any) => <p style={styles.paragraph}>{children}</p>,
-      h2: ({ children }: any) => <h2 style={styles.h2}>{children}</h2>,
-      h3: ({ children }: any) => <h3 style={styles.h3}>{children}</h3>,
+      normal: ({ children }) => <p style={styles.paragraph}>{children}</p>,
+      h2: ({ children }) => <h2 style={styles.h2}>{children}</h2>,
+      h3: ({ children }) => <h3 style={styles.h3}>{children}</h3>,
     },
     list: {
-      bullet: ({ children }: any) => <ul style={styles.bulletList}>{children}</ul>,
-      number: ({ children }: any) => <ol style={styles.numberList}>{children}</ol>,
+      bullet: ({ children }) => <ul style={styles.bulletList}>{children}</ul>,
+      number: ({ children }) => <ol style={styles.numberList}>{children}</ol>,
     },
     listItem: {
-      bullet: ({ children }: any) => <li style={styles.listItem}>{children}</li>,
-      number: ({ children }: any) => <li style={styles.listItem}>{children}</li>,
+      bullet: ({ children }) => <li style={styles.listItem}>{children}</li>,
+      number: ({ children }) => <li style={styles.listItem}>{children}</li>,
     },
   };
 
@@ -164,12 +169,13 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           background: white;
           border-radius: 0.75rem;
           overflow: hidden;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .related-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.02);
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+            0 10px 10px -5px rgba(0, 0, 0, 0.02);
         }
         .related-card:hover .related-title {
           color: #10b981;
@@ -222,7 +228,7 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           <PortableText value={post.body} components={components} />
         </div>
 
-        {/* FIXED: Sources & References section - no overflow on mobile */}
+        {/* Sources section – fixed mobile overflow */}
         {post.sources && post.sources.length > 0 && (
           <div style={styles.sourcesBox}>
             <h3 style={styles.sourcesHeading}>Sources & References</h3>
@@ -230,10 +236,10 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               {post.sources.map((src, idx) => (
                 <li key={idx} style={styles.sourcesListItem}>
                   {src.startsWith('http') ? (
-                    <a 
-                      href={src} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                    <a
+                      href={src}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={styles.sourceLink}
                     >
                       {src}
@@ -251,9 +257,10 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
           <p style={styles.disclaimerText}>
             <strong>⚠️ MEDICAL DISCLAIMER:</strong> This article is for educational purposes only
             and does not constitute medical advice. The information provided should not be used to
-            diagnose, treat, cure, or prevent any medical condition. Always consult with a qualified
-            healthcare professional before making changes to your health routine or treatment plan.
-            <strong> In case of a medical emergency, please call 911 or visit the nearest emergency room.</strong>
+            diagnose, treat, cure, or prevent any medical condition. Always consult with a
+            qualified healthcare professional before making changes to your health routine or
+            treatment plan. <strong>In case of a medical emergency, please call 911 or visit the
+            nearest emergency room.</strong>
           </p>
         </div>
 
@@ -277,7 +284,9 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               Facebook
             </a>
             <a
-              href={`https://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}&title=${encodeURIComponent(post.title)}`}
+              href={`https://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}&title=${encodeURIComponent(
+                post.title
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
               style={styles.shareButton}
@@ -289,9 +298,12 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
 
         <div style={styles.authorBio}>
           <div style={styles.authorAvatar}>
-            <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
               <circle cx="30" cy="30" r="30" fill="#10b981" />
-              <path d="M30 15 C35 15 39 19 39 24 C39 29 35 33 30 33 C25 33 21 29 21 24 C21 19 25 15 30 15 Z" fill="white" />
+              <path
+                d="M30 15 C35 15 39 19 39 24 C39 29 35 33 30 33 C25 33 21 29 21 24 C21 19 25 15 30 15 Z"
+                fill="white"
+              />
               <circle cx="30" cy="38" r="12" fill="white" />
             </svg>
           </div>
@@ -301,7 +313,8 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
               Health & wellness writer, founder of Daily Well Fact. Learn more{' '}
               <Link href="/about" style={styles.authorLink}>
                 on the About page
-              </Link>.
+              </Link>
+              .
             </p>
           </div>
         </div>
@@ -327,7 +340,11 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
                     </Link>
                   )}
                   <div style={styles.relatedCardContent}>
-                    <Link href={`/post/${related.slug.current}`} className="related-title" style={styles.relatedCardTitle}>
+                    <Link
+                      href={`/post/${related.slug.current}`}
+                      className="related-title"
+                      style={styles.relatedCardTitle}
+                    >
                       {related.title}
                     </Link>
                     <p style={styles.relatedCardMeta}>
@@ -348,27 +365,27 @@ const PostPage: NextPage<Props> = ({ post, relatedPosts }) => {
   );
 };
 
-// Styles object with overflow fixes for sources section and overall responsiveness
-const styles = {
+// Styles object – properly typed as React.CSSProperties
+const styles: { [key: string]: CSSProperties } = {
   container: {
     maxWidth: 800,
     margin: '0 auto',
-    padding: '0 1rem',           // added horizontal padding for mobile breathing room
-    overflowX: 'hidden' as const, // prevent any accidental horizontal scroll
+    padding: '0 1rem',
+    overflowX: 'hidden',
   },
   backLink: {
     display: 'inline-block',
     marginBottom: '2rem',
     color: '#10b981',
     textDecoration: 'none',
-    fontWeight: '500',
+    fontWeight: 500,
   },
   title: {
-    fontSize: '2rem',            // slightly reduced for better mobile fit
+    fontSize: '2rem',
     fontWeight: 'bold',
     color: '#111827',
     marginBottom: '0.5rem',
-    wordBreak: 'break-word',     // prevent long title overflow
+    wordBreak: 'break-word',
   },
   meta: {
     fontSize: '0.875rem',
@@ -378,7 +395,7 @@ const styles = {
   featuredImageWrapper: {
     width: '100%',
     marginBottom: '2rem',
-    position: 'relative' as const,
+    position: 'relative',
   },
   featuredImage: {
     width: '100%',
@@ -390,12 +407,12 @@ const styles = {
     lineHeight: 1.7,
     color: '#1f2937',
     marginBottom: '2rem',
-    wordBreak: 'break-word',     // ensure text wraps
+    wordBreak: 'break-word',
   },
   imageWrapper: {
     width: '100%',
     margin: '1.5rem 0',
-    position: 'relative' as const,
+    position: 'relative',
   },
   blogImage: {
     width: '100%',
@@ -443,7 +460,7 @@ const styles = {
     padding: '1.5rem 0',
     borderTop: '1px solid #e5e7eb',
     borderBottom: '1px solid #e5e7eb',
-    textAlign: 'center' as const,
+    textAlign: 'center',
   },
   shareText: {
     marginBottom: '1rem',
@@ -454,7 +471,7 @@ const styles = {
     display: 'flex',
     gap: '1rem',
     justifyContent: 'center',
-    flexWrap: 'wrap' as const,
+    flexWrap: 'wrap',
   },
   shareButton: {
     backgroundColor: '#f3f4f6',
@@ -474,7 +491,7 @@ const styles = {
     padding: '1.5rem',
     backgroundColor: '#f9fafb',
     borderRadius: '1rem',
-    flexWrap: 'wrap' as const,
+    flexWrap: 'wrap',
   },
   authorAvatar: {
     flexShrink: 0,
@@ -512,7 +529,7 @@ const styles = {
   },
   relatedCardTitle: {
     fontSize: '1rem',
-    fontWeight: '600',
+    fontWeight: 600,
     color: '#111827',
     textDecoration: 'none',
     display: 'inline-block',
@@ -538,14 +555,13 @@ const styles = {
     margin: 0,
     lineHeight: 1.5,
   },
-  // FIXED: Sources section with proper word wrapping and container constraint
   sourcesBox: {
     backgroundColor: '#f0fdf4',
     borderLeft: '4px solid #10b981',
     padding: '1rem 1.25rem',
     margin: '2rem 0',
     borderRadius: '0.5rem',
-    overflowX: 'hidden' as const,
+    overflowX: 'hidden',
   },
   sourcesHeading: {
     fontSize: '1rem',
@@ -556,15 +572,15 @@ const styles = {
   sourcesList: {
     margin: 0,
     paddingLeft: '1.5rem',
-    listStylePosition: 'outside' as const,
+    listStylePosition: 'outside',
   },
   sourcesListItem: {
     fontSize: '0.875rem',
     color: '#065f46',
     marginBottom: '0.25rem',
-    wordBreak: 'break-word',       // break long URLs
-    overflowWrap: 'break-word',    // force wrap onto next line
-    whiteSpace: 'normal' as const,
+    wordBreak: 'break-word',
+    overflowWrap: 'break-word',
+    whiteSpace: 'normal',
   },
   sourceLink: {
     color: '#10b981',
